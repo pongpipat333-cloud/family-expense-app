@@ -192,15 +192,23 @@ html, body {
 .section-date { font-size: 12px; font-weight: 600; color: var(--text-3); padding: 12px 4px 6px; text-transform: uppercase; letter-spacing: 0.4px; display: flex; justify-content: space-between; }
 
 /* ===== Filter bar ===== */
-.filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
-.filter-bar::-webkit-scrollbar { display: none; }
+.filter-section { margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px; }
+.filter-row { display: flex; align-items: center; gap: 8px; }
+.filter-row-label {
+  font-size: 11px; font-weight: 600; color: var(--text-3);
+  white-space: nowrap; min-width: 44px; letter-spacing: 0.3px;
+}
+.filter-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.filter-chips::-webkit-scrollbar { display: none; }
 .filter-chip {
-  padding: 7px 14px; border-radius: 100px;
+  padding: 6px 13px; border-radius: 100px;
   border: 1.5px solid var(--border); background: var(--surface);
   font-size: 13px; cursor: pointer; white-space: nowrap;
   color: var(--text-2); font-family: inherit; transition: all 0.15s;
 }
 .filter-chip.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+.filter-chip[data-filter="payer"].active { background: #eff6ff; border-color: #3b82f6; color: #2563eb; }
+.filter-chip[data-filter="type"].active { background: #f0fdf4; border-color: #22c55e; color: #16a34a; }
 
 /* ===== Month Selector ===== */
 .month-selector { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -349,13 +357,24 @@ html, body {
 
     <!-- Tab 1: บันทึก -->
     <div class="tab-panel active" id="panel-record">
-      <div class="filter-bar">
-        <button class="filter-chip active" data-filter="month" data-value="current">เดือนนี้</button>
-        <button class="filter-chip" data-filter="payer" data-value="dad">พ่อ</button>
-        <button class="filter-chip" data-filter="payer" data-value="mom">แม่</button>
-        <button class="filter-chip" data-filter="payer" data-value="child">ลูก</button>
-        <button class="filter-chip" data-filter="type" data-value="personal">ส่วนตัว</button>
-        <button class="filter-chip" data-filter="type" data-value="family">ครอบครัว</button>
+      <div class="filter-section">
+        <div class="filter-row">
+          <span class="filter-row-label">ผู้จ่าย</span>
+          <div class="filter-chips">
+            <button class="filter-chip active" data-filter="payer" data-value="all">ทั้งหมด</button>
+            <button class="filter-chip" data-filter="payer" data-value="dad">พ่อ</button>
+            <button class="filter-chip" data-filter="payer" data-value="mom">แม่</button>
+            <button class="filter-chip" data-filter="payer" data-value="child">ลูก</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-row-label">ประเภท</span>
+          <div class="filter-chips">
+            <button class="filter-chip active" data-filter="type" data-value="all">ทั้งหมด</button>
+            <button class="filter-chip" data-filter="type" data-value="personal">ส่วนตัว</button>
+            <button class="filter-chip" data-filter="type" data-value="family">ครอบครัว</button>
+          </div>
+        </div>
       </div>
       <div id="expense-list">
         <div class="empty-state">
@@ -928,13 +947,9 @@ window._editExp = id => {
 document.querySelectorAll('.filter-chip').forEach(chip => {
   chip.addEventListener('click', () => {
     const { filter, value } = chip.dataset;
-    if (filter === 'month') return;
-    if (chip.classList.contains('active')) {
-      chip.classList.remove('active'); activeFilters[filter] = null;
-    } else {
-      document.querySelectorAll(`.filter-chip[data-filter="${filter}"]`).forEach(c => c.classList.remove('active'));
-      chip.classList.add('active'); activeFilters[filter] = value || null;
-    }
+    document.querySelectorAll(`.filter-chip[data-filter="${filter}"]`).forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilters[filter] = (value === 'all') ? null : value;
     renderExpenses();
   });
 });
