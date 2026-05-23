@@ -596,8 +596,20 @@ html, body {
     <!-- Tab 5: ออม/ลงทุน -->
     <div class="tab-panel" id="panel-savings">
       <div class="stat-grid">
-        <div class="stat-card"><div class="stat-label">ออม & ลงทุนรวม</div><div class="stat-value green" id="sv-total">฿0</div></div>
+        <div class="stat-card"><div class="stat-label">เงินที่เติมรวม</div><div class="stat-value green" id="sv-total">฿0</div></div>
         <div class="stat-card"><div class="stat-label">เดือนนี้</div><div class="stat-value" id="sv-monthly">฿0</div></div>
+      </div>
+      <div class="stat-grid" style="grid-template-columns:1fr 1fr">
+        <div class="stat-card">
+          <div class="stat-label">มูลค่าปัจจุบันรวม</div>
+          <div class="stat-value" id="sv-cur-total" style="color:var(--accent)">—</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px">รายการที่อัปเดตแล้ว</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ผลตอบแทนรวม</div>
+          <div class="stat-value" id="sv-return">—</div>
+          <div style="font-size:10px;margin-top:2px" id="sv-return-pct" style="color:var(--text-3)"></div>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">รายการออม & ลงทุน</div>
@@ -882,8 +894,12 @@ html, body {
       <input type="date" class="form-input" id="sv-date">
     </div>
     <div class="form-group">
-      <label class="form-label">จำนวนเงิน (บาท)</label>
+      <label class="form-label">เงินที่เติมเข้าพอร์ต (บาท)</label>
       <input type="number" class="form-input" id="sv-amount" placeholder="0" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label class="form-label">มูลค่าพอร์ตปัจจุบัน (บาท) <span style="font-weight:400;color:var(--text-3)">— อัปเดตเมื่ออยากดูผลตอบแทน</span></label>
+      <input type="number" class="form-input" id="sv-current" placeholder="ไม่บังคับ" inputmode="decimal">
     </div>
     <div class="form-group">
       <label class="form-label">ประเภท</label>
@@ -1838,8 +1854,27 @@ window._deletePayment = async (debtId, paymentId, balanceBefore) => {
 
 // ===== Savings =====
 function renderSavings() {
-  const total   = savings.reduce((s,e)=>s+Number(e.amount),0);
-  const now     = new Date();
+  const total     = savings.reduce((s,e)=>s+Number(e.amount),0);
+  // only count entries that have currentValue set
+  const withVal   = savings.filter(e=>e.currentValue>0);
+  const invested  = withVal.reduce((s,e)=>s+Number(e.amount),0);
+  const curTotal  = withVal.reduce((s,e)=>s+Number(e.currentValue),0);
+  const ret       = curTotal - invested;
+  const retPct    = invested > 0 ? ret/invested*100 : 0;
+
+  document.getElementById('sv-cur-total').textContent = withVal.length ? fmt(curTotal) : '—';
+  const retEl  = document.getElementById('sv-return');
+  const retPEl = document.getElementById('sv-return-pct');
+  if (withVal.length) {
+    retEl.textContent   = (ret >= 0 ? '+' : '') + fmt(ret);
+    retEl.style.color   = ret >= 0 ? 'var(--green)' : 'var(--red)';
+    retPEl.textContent  = (ret >= 0 ? '+' : '') + retPct.toFixed(2) + '%';
+    retPEl.style.color  = ret >= 0 ? 'var(--green)' : 'var(--red)';
+  } else {
+    retEl.textContent = '—'; retEl.style.color = 'var(--text-3)'; retPEl.textContent = '';
+  }
+
+  const now = new Date();
   const monthly = savings.filter(e=>{
     const d = new Date(e.date+'T00:00:00');
     return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
@@ -1850,12 +1885,21 @@ function renderSavings() {
   if (!savings.length) { list.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-2)">ยังไม่มีรายการ</div>`; return; }
   list.innerHTML = savings.map(s => {
     const t = SV_TYPES[s.type]||{name:s.type,icon:'💰'};
+    const hasCur = s.currentValue > 0;
+    const ret    = hasCur ? s.currentValue - s.amount : 0;
+    const retPct = hasCur && s.amount > 0 ? ret/s.amount*100 : 0;
+    const retColor = ret >= 0 ? 'var(--green)' : 'var(--red)';
     return `<div class="savings-item" onclick="window._editSv('${s.id}')">
-      <div>
+      <div style="flex:1;min-width:0">
         <div style="font-size:14px;font-weight:500">${t.icon} ${t.name}${s.note?' — '+s.note:''}</div>
         <div style="font-size:12px;color:var(--text-2)">${fmtDate(s.date)} · ${PAYERS[s.payer]||s.payer}</div>
+        ${hasCur ? `<div style="font-size:12px;margin-top:4px;display:flex;gap:10px;flex-wrap:wrap">
+          <span style="color:var(--text-2)">เติม <strong style="color:var(--text-1)">${fmt(s.amount)}</strong></span>
+          <span style="color:var(--text-2)">ตอนนี้ <strong style="color:var(--accent)">${fmt(s.currentValue)}</strong></span>
+          <span style="font-weight:700;color:${retColor}">${ret>=0?'+':''}${fmt(ret)} (${ret>=0?'+':''}${retPct.toFixed(1)}%)</span>
+        </div>` : ''}
       </div>
-      <div style="font-weight:700;color:var(--green)">${fmt(s.amount)}</div>
+      <div style="font-weight:700;color:var(--green);white-space:nowrap;margin-left:8px">${hasCur ? fmt(s.currentValue) : fmt(s.amount)}</div>
     </div>`;
   }).join('');
 }
@@ -1863,9 +1907,10 @@ function renderSavings() {
 window._editSv = id => {
   const s = savings.find(x=>x.id===id); if(!s) return;
   editSvId = id;
-  document.getElementById('sv-date').value   = s.date;
-  document.getElementById('sv-amount').value = s.amount;
-  document.getElementById('sv-note').value   = s.note||'';
+  document.getElementById('sv-date').value    = s.date;
+  document.getElementById('sv-amount').value  = s.amount;
+  document.getElementById('sv-current').value = s.currentValue || '';
+  document.getElementById('sv-note').value    = s.note||'';
   setPill('pg-sv-type', s.type); setPill('pg-sv-payer', s.payer);
   document.getElementById('sv-delete').style.display = 'block';
   document.getElementById('savings-modal').classList.add('open');
@@ -1874,7 +1919,7 @@ window._editSv = id => {
 document.getElementById('add-savings-btn').addEventListener('click', () => {
   editSvId = null;
   document.getElementById('sv-date').value = today();
-  document.getElementById('sv-amount').value = document.getElementById('sv-note').value = '';
+  document.getElementById('sv-amount').value = document.getElementById('sv-current').value = document.getElementById('sv-note').value = '';
   setPill('pg-sv-type','savings'); setPill('pg-sv-payer','dad');
   document.getElementById('sv-delete').style.display = 'none';
   document.getElementById('savings-modal').classList.add('open');
@@ -1888,6 +1933,7 @@ document.getElementById('sv-save').addEventListener('click', async () => {
   if (!amount||amount<=0) { showToast('กรุณากรอกจำนวนเงิน'); return; }
   const data = {
     date: document.getElementById('sv-date').value, amount,
+    currentValue: parseFloat(document.getElementById('sv-current').value) || 0,
     type: getPill('pg-sv-type'), payer: getPill('pg-sv-payer'),
     note: document.getElementById('sv-note').value.trim(),
   };
