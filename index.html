@@ -572,6 +572,23 @@ html, body {
         <div class="stat-card"><div class="stat-label">หนี้รวมทั้งหมด</div><div class="stat-value red" id="d-total">฿0</div></div>
         <div class="stat-card"><div class="stat-label">ค่างวดต่อเดือน</div><div class="stat-value orange" id="d-monthly-stat">฿0</div></div>
       </div>
+      <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="stat-card">
+          <div class="stat-label">ดอกเบี้ย/เดือน</div>
+          <div class="stat-value" style="color:var(--red)" id="d-interest-stat">฿0</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px">เสียเปล่า</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ต้นลดจริง/เดือน</div>
+          <div class="stat-value green" id="d-principal-stat">฿0</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px">ลดหนี้จริง</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">หนี้/รายได้ (DTI)</div>
+          <div class="stat-value" id="d-dti">—</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px" id="d-dti-label">เดือนนี้</div>
+        </div>
+      </div>
       <div id="debt-list"></div>
       <button class="btn btn-primary" id="add-debt-btn" style="margin-top:4px">+ เพิ่มรายการหนี้</button>
     </div>
@@ -1537,8 +1554,30 @@ function formatPayoff(remaining, monthly, interestPct) {
 function renderDebts() {
   const total   = debts.reduce((s,d)=>s+Number(d.remaining||0),0);
   const monthly = debts.reduce((s,d)=>s+Number(d.monthly||0),0);
-  document.getElementById('d-total').textContent   = fmt(total);
+  const totalInterest = debts.reduce((s,d)=>{
+    const r=(d.interest||0)/100/12; return s+Number(d.remaining||0)*r;
+  },0);
+  const totalPrincipal = Math.max(0, monthly - totalInterest);
+  // DTI: ค่างวดรวม ÷ รายรับเดือนปัจจุบัน
+  const curMonth = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+  const monthIncome = incomes.filter(i=>i.date&&i.date.startsWith(curMonth)).reduce((s,i)=>s+Number(i.amount),0);
+  const dti = monthIncome > 0 ? monthly / monthIncome * 100 : null;
+
+  document.getElementById('d-total').textContent        = fmt(total);
   document.getElementById('d-monthly-stat').textContent = fmt(monthly);
+  document.getElementById('d-interest-stat').textContent = fmt(totalInterest);
+  document.getElementById('d-principal-stat').textContent = fmt(totalPrincipal);
+
+  const dtiEl = document.getElementById('d-dti');
+  const dtiLbl = document.getElementById('d-dti-label');
+  if (dti === null) {
+    dtiEl.textContent = '—'; dtiEl.style.color = 'var(--text-3)';
+    dtiLbl.textContent = 'ยังไม่มีรายรับ';
+  } else {
+    dtiEl.textContent = dti.toFixed(1) + '%';
+    dtiLbl.textContent = dti <= 35 ? '✅ ปลอดภัย' : dti <= 45 ? '⚠️ ควรระวัง' : '🔴 สูงเกินไป';
+    dtiEl.style.color = dti <= 35 ? 'var(--green)' : dti <= 45 ? 'var(--orange)' : 'var(--red)';
+  }
 
   if (!debts.length) {
     document.getElementById('debt-list').innerHTML = `<div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">ยังไม่มีรายการหนี้</div></div>`;
