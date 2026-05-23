@@ -295,6 +295,19 @@ html, body {
 .debt-payoff .po-warn { font-weight:600; color:var(--red); }
 .debt-payoff .po-pn  { color:var(--text-3); }
 
+.btn-pay-debt {
+  width:100%; margin-top:10px; padding:8px 12px;
+  border-radius:8px; border:1.5px solid var(--accent);
+  background:var(--accent-bg); color:var(--accent);
+  font-size:13px; font-weight:600; font-family:inherit; cursor:pointer;
+  transition: all 0.15s;
+}
+.btn-pay-debt:active { background:var(--accent); color:#fff; }
+.pay-preview { background:var(--bg); border-radius:var(--radius-sm); padding:12px; margin-top:8px; }
+.pay-preview-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:var(--text-2); }
+.pay-preview-row.total { font-weight:700; color:var(--text-1); border-top:1px solid var(--border); margin-top:6px; padding-top:10px; }
+.pay-preview-row.warn  { color:var(--orange); font-size:12px; }
+
 /* ===== Savings ===== */
 .savings-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
 .savings-item:last-child { border-bottom: none; }
@@ -788,6 +801,33 @@ html, body {
       <button class="btn btn-primary" style="flex:2" id="debt-save">บันทึก</button>
     </div>
     <button class="btn btn-danger" style="width:100%;margin-top:8px;display:none" id="debt-delete">ลบรายการนี้</button>
+  </div>
+</div>
+
+<!-- Modal: บันทึกการจ่ายหนี้ -->
+<div class="modal-overlay" id="pay-modal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">💳 บันทึกการจ่ายหนี้</div>
+    <div id="pay-debt-name" style="font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:16px"></div>
+    <div class="form-group">
+      <label class="form-label">วันที่จ่าย</label>
+      <input type="date" class="form-input" id="pay-date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">จำนวนที่จ่ายจริง (บาท)</label>
+      <input type="number" class="form-input" id="pay-amount" inputmode="decimal" placeholder="0">
+    </div>
+    <div class="pay-preview" id="pay-preview">
+      <div class="pay-preview-row"><span>ดอกเบี้ยเดือนนี้</span><span id="prev-interest">฿0</span></div>
+      <div class="pay-preview-row"><span>เงินต้นที่ลด</span><span id="prev-principal">฿0</span></div>
+      <div class="pay-preview-row warn" id="prev-warn" style="display:none"><span id="prev-warn-text"></span></div>
+      <div class="pay-preview-row total"><span>ยอดหนี้ใหม่</span><span id="prev-new-bal" style="color:var(--red)">฿0</span></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-ghost" style="flex:1" id="pay-cancel">ยกเลิก</button>
+      <button class="btn btn-primary" style="flex:2" id="pay-confirm">✅ บันทึก</button>
+    </div>
   </div>
 </div>
 
@@ -1501,6 +1541,7 @@ function renderDebts() {
         <span class="po-label">📅 คาดว่าหมดหนี้:</span>
         ${formatPayoff(d.remaining, d.monthly, d.interest)}
       </div>
+      <button class="btn-pay-debt" onclick="event.stopPropagation();window._payDebt('${d.id}')">💳 บันทึกจ่ายงวดนี้</button>
     </div>`;
   }).join('');
 }
@@ -1564,6 +1605,72 @@ document.getElementById('debt-delete').addEventListener('click', async () => {
     document.getElementById('debt-modal').classList.remove('open');
   } catch(e) {
     showToast('ลบไม่สำเร็จ: ' + (e.code || e.message));
+  }
+});
+
+// ===== Pay Debt Modal =====
+let payDebtId = null;
+
+function calcPayPreview(remaining, monthly, interestPct, amount) {
+  const r = (interestPct || 0) / 100 / 12;
+  const interestAmt = remaining * r;
+  const principalPaid = Math.max(0, amount - interestAmt);
+  const newBal = Math.max(0, remaining - principalPaid);
+  return { interestAmt, principalPaid, newBal };
+}
+
+function updatePayPreview() {
+  const d = debts.find(x => x.id === payDebtId); if (!d) return;
+  const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
+  const { interestAmt, principalPaid, newBal } = calcPayPreview(d.remaining, d.monthly, d.interest, amount);
+  document.getElementById('prev-interest').textContent = fmt(interestAmt);
+  document.getElementById('prev-principal').textContent = fmt(principalPaid);
+  document.getElementById('prev-new-bal').textContent = fmt(newBal);
+  const warnEl = document.getElementById('prev-warn');
+  const warnTxt = document.getElementById('prev-warn-text');
+  if (amount > 0 && amount < interestAmt) {
+    warnTxt.textContent = '⚠️ จ่ายน้อยกว่าดอกเบี้ย — ยอดต้นไม่ลด';
+    warnEl.style.display = 'flex';
+  } else if (d.monthly > 0 && amount < d.monthly) {
+    warnTxt.textContent = `ℹ️ จ่ายน้อยกว่างวดปกติ (${fmt(d.monthly)})`;
+    warnEl.style.display = 'flex';
+  } else if (d.monthly > 0 && amount > d.monthly) {
+    warnTxt.textContent = `ℹ️ จ่ายมากกว่างวดปกติ — เงินต้นลดเพิ่ม ${fmt(principalPaid - (d.monthly - interestAmt))} บาท`;
+    warnEl.style.display = 'flex';
+  } else {
+    warnEl.style.display = 'none';
+  }
+}
+
+window._payDebt = id => {
+  const d = debts.find(x => x.id === id); if (!d) return;
+  payDebtId = id;
+  document.getElementById('pay-debt-name').textContent = d.name;
+  document.getElementById('pay-date').value = today();
+  document.getElementById('pay-amount').value = d.monthly || '';
+  updatePayPreview();
+  document.getElementById('pay-modal').classList.add('open');
+};
+
+document.getElementById('pay-amount').addEventListener('input', updatePayPreview);
+document.getElementById('pay-cancel').addEventListener('click', () =>
+  document.getElementById('pay-modal').classList.remove('open'));
+
+document.getElementById('pay-confirm').addEventListener('click', async () => {
+  const d = debts.find(x => x.id === payDebtId); if (!d) return;
+  const amount = parseFloat(document.getElementById('pay-amount').value);
+  if (isNaN(amount) || amount <= 0) { showToast('กรุณากรอกจำนวนเงินที่จ่าย'); return; }
+  const { principalPaid, newBal } = calcPayPreview(d.remaining, d.monthly, d.interest, amount);
+  const newMonths = (d.months > 0 && principalPaid > 0) ? Math.max(0, d.months - 1) : (d.months || 0);
+  try {
+    await updateDoc(doc(db, 'users', uid, 'debts', payDebtId), {
+      remaining: newBal,
+      months: newMonths,
+    });
+    showToast('บันทึกการจ่ายแล้ว ✅');
+    document.getElementById('pay-modal').classList.remove('open');
+  } catch(e) {
+    showToast('เกิดข้อผิดพลาด: ' + (e.code || e.message));
   }
 });
 
