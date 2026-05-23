@@ -238,6 +238,19 @@ html, body {
 .health-status { display:flex; align-items:center; gap:10px; padding:14px; background:var(--surface); border-radius:var(--radius-sm); box-shadow:var(--shadow); margin-bottom:10px; }
 .health-status-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 
+/* ===== Category Grid ===== */
+.cat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.cat-btn {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:10px 4px; border-radius:12px; border:1.5px solid var(--border);
+  background:var(--surface); cursor:pointer; font-family:inherit; transition:all 0.15s;
+}
+.cat-btn .cat-icon { font-size:22px; line-height:1; }
+.cat-btn .cat-name { font-size:10px; color:var(--text-2); text-align:center; line-height:1.2; }
+.cat-btn.active { border-color: var(--accent); background:var(--accent-bg); }
+.cat-btn.active .cat-name { color:var(--accent); font-weight:600; }
+.cat-section-label { font-size:11px; font-weight:600; color:var(--text-3); margin:10px 0 6px; letter-spacing:0.4px; }
+
 /* ===== Month Selector ===== */
 .month-selector { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .month-btn {
@@ -673,27 +686,27 @@ html, body {
     </div>
     <div class="form-group">
       <label class="form-label">หมวดหมู่</label>
-      <select class="form-input form-select" id="in-category">
-        <optgroup label="รายจ่ายทั่วไป">
-          <option value="food">อาหาร & เครื่องดื่ม</option>
-          <option value="utilities">สาธารณูปโภค</option>
-          <option value="transport">การเดินทาง</option>
-          <option value="health">สุขภาพ & ยา</option>
-          <option value="education">การศึกษา</option>
-          <option value="clothing">เสื้อผ้า & ของใช้</option>
-          <option value="entertainment">ความบันเทิง</option>
-          <option value="gift_social">ของขวัญ & สังคม</option>
-          <option value="child">ค่าใช้จ่ายลูก</option>
-          <option value="parent_care">ดูแลบุพการี</option>
-          <option value="other">อื่นๆ</option>
-        </optgroup>
-        <optgroup label="ภาระหนี้">
-          <option value="debt_house">ผ่อนบ้าน</option>
-          <option value="debt_car">ผ่อนรถ</option>
-          <option value="debt_personal">สินเชื่อส่วนบุคคล</option>
-          <option value="debt_credit">บัตรเครดิต</option>
-        </optgroup>
-      </select>
+      <div class="cat-section-label">รายจ่ายทั่วไป</div>
+      <div class="cat-grid" id="cat-grid-general">
+        <button class="cat-btn active" data-value="food"><span class="cat-icon">🍜</span><span class="cat-name">อาหาร & เครื่องดื่ม</span></button>
+        <button class="cat-btn" data-value="utilities"><span class="cat-icon">💡</span><span class="cat-name">สาธารณูปโภค</span></button>
+        <button class="cat-btn" data-value="transport"><span class="cat-icon">🚗</span><span class="cat-name">การเดินทาง</span></button>
+        <button class="cat-btn" data-value="health"><span class="cat-icon">💊</span><span class="cat-name">สุขภาพ & ยา</span></button>
+        <button class="cat-btn" data-value="education"><span class="cat-icon">📚</span><span class="cat-name">การศึกษา</span></button>
+        <button class="cat-btn" data-value="clothing"><span class="cat-icon">👕</span><span class="cat-name">เสื้อผ้า & ของใช้</span></button>
+        <button class="cat-btn" data-value="entertainment"><span class="cat-icon">🎬</span><span class="cat-name">ความบันเทิง</span></button>
+        <button class="cat-btn" data-value="gift_social"><span class="cat-icon">🎁</span><span class="cat-name">ของขวัญ & สังคม</span></button>
+        <button class="cat-btn" data-value="child"><span class="cat-icon">👶</span><span class="cat-name">ค่าใช้จ่ายลูก</span></button>
+        <button class="cat-btn" data-value="parent_care"><span class="cat-icon">👴</span><span class="cat-name">ดูแลบุพการี</span></button>
+        <button class="cat-btn" data-value="other"><span class="cat-icon">📌</span><span class="cat-name">อื่นๆ</span></button>
+      </div>
+      <div class="cat-section-label" style="margin-top:12px">ภาระหนี้</div>
+      <div class="cat-grid" id="cat-grid-debt">
+        <button class="cat-btn" data-value="debt_house"><span class="cat-icon">🏠</span><span class="cat-name">ผ่อนบ้าน</span></button>
+        <button class="cat-btn" data-value="debt_car"><span class="cat-icon">🚘</span><span class="cat-name">ผ่อนรถ</span></button>
+        <button class="cat-btn" data-value="debt_personal"><span class="cat-icon">💳</span><span class="cat-name">สินเชื่อส่วนบุคคล</span></button>
+        <button class="cat-btn" data-value="debt_credit"><span class="cat-icon">💴</span><span class="cat-name">บัตรเครดิต</span></button>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">ประเภท</label>
@@ -1182,7 +1195,7 @@ window._editExp = id => {
   document.getElementById('expense-modal-title').textContent = 'แก้ไขรายจ่าย';
   document.getElementById('in-date').value = e.date;
   document.getElementById('in-amount').value = e.amount;
-  document.getElementById('in-category').value = e.category;
+  setActiveCat(e.category);
   document.getElementById('in-note').value = e.note || '';
   setPill('pg-type', e.type); setPill('pg-payer', e.payer); setPill('pg-payment', e.paymentMethod);
   document.getElementById('exp-delete').style.display = 'block';
@@ -1197,6 +1210,19 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
     activeFilters[filter] = (value === 'all') ? null : value;
     renderExpenses();
   });
+});
+
+// ===== Category Grid =====
+function getActiveCat() {
+  return document.querySelector('.cat-btn.active')?.dataset.value || 'food';
+}
+function setActiveCat(val) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  const target = document.querySelector(`.cat-btn[data-value="${val}"]`);
+  if (target) target.classList.add('active');
+}
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => setActiveCat(btn.dataset.value));
 });
 
 // ===== Income Modal =====
@@ -1262,7 +1288,7 @@ document.getElementById('fab-add').addEventListener('click', () => {
   document.getElementById('expense-modal-title').textContent = 'เพิ่มรายจ่าย';
   document.getElementById('in-date').value = today();
   document.getElementById('in-amount').value = '';
-  document.getElementById('in-category').value = 'food';
+  setActiveCat('food');
   document.getElementById('in-note').value = '';
   setPill('pg-type','personal'); setPill('pg-payer','dad'); setPill('pg-payment','cash');
   document.getElementById('exp-delete').style.display = 'none';
@@ -1278,7 +1304,7 @@ document.getElementById('exp-save').addEventListener('click', async () => {
   const data = {
     date: document.getElementById('in-date').value,
     amount,
-    category: document.getElementById('in-category').value,
+    category: getActiveCat(),
     type: getPill('pg-type'),
     payer: getPill('pg-payer'),
     paymentMethod: getPill('pg-payment'),
