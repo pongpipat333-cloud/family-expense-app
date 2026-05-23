@@ -329,10 +329,17 @@ html, body {
 .pay-preview-row.warn  { color:var(--orange); font-size:12px; }
 
 /* ===== Savings Portfolio ===== */
-.sv-summary { background:var(--surface); border-radius:var(--radius); padding:16px 18px; margin-bottom:12px; box-shadow:var(--shadow); display:flex; justify-content:space-between; align-items:flex-end; }
-.sv-sum-label { font-size:11px; color:var(--text-3); font-weight:600; text-transform:uppercase; letter-spacing:.4px; margin-bottom:2px; }
-.sv-sum-val { font-size:24px; font-weight:800; color:var(--text-1); }
-.sv-sum-ret { font-size:14px; font-weight:700; }
+.sv-summary { background:var(--surface); border-radius:var(--radius); padding:14px 16px; margin-bottom:12px; box-shadow:var(--shadow); display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; }
+.sv-sum-col { padding:4px 8px; }
+.sv-sum-col:first-child { padding-left:0; }
+.sv-sum-col:last-child  { padding-right:0; border-left:1px solid var(--border,#e8e8e8); }
+.sv-sum-col:nth-child(2){ border-left:1px solid var(--border,#e8e8e8); }
+.sv-sum-label { font-size:10px; color:var(--text-3); font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px; }
+.sv-sum-val   { font-size:20px; font-weight:800; color:var(--text-1); line-height:1.2; }
+.sv-sum-val2  { font-size:15px; font-weight:800; color:var(--text-1); line-height:1.3; }
+.sv-sum-sub   { font-size:11px; color:var(--text-3); margin-top:1px; }
+.sv-sum-ret   { font-size:12px; font-weight:700; margin-top:2px; }
+.sv-sum-ret2  { font-size:11px; font-weight:600; }
 .sv-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .sv-section { margin-bottom:18px; }
 .sv-section-hdr { display:flex; justify-content:space-between; align-items:center; padding:6px 2px 8px; margin-bottom:8px; border-bottom:2px solid var(--border,#e8e8e8); }
@@ -625,12 +632,21 @@ html, body {
     <div class="tab-panel" id="panel-savings">
       <!-- Summary header -->
       <div class="sv-summary">
-        <div>
+        <!-- Col 1: มูลค่ารวม -->
+        <div class="sv-sum-col">
           <div class="sv-sum-label">มูลค่ารวม</div>
           <div class="sv-sum-val" id="sv-total">฿0</div>
         </div>
-        <div style="text-align:right">
-          <div class="sv-sum-label">กำไร / ขาดทุน</div>
+        <!-- Col 2: เงินออม -->
+        <div class="sv-sum-col">
+          <div class="sv-sum-label">🏦 เงินออม</div>
+          <div class="sv-sum-val2" id="sv-save-total">—</div>
+        </div>
+        <!-- Col 3: การลงทุน -->
+        <div class="sv-sum-col">
+          <div class="sv-sum-label">📈 การลงทุน</div>
+          <div class="sv-sum-val2" id="sv-inv-total">—</div>
+          <div class="sv-sum-sub">ต้นทุน <span id="sv-inv-cost">—</span></div>
           <div class="sv-sum-ret" id="sv-return">—</div>
         </div>
       </div>
@@ -1905,7 +1921,17 @@ function renderSavings() {
   const totalRet    = investCur - investAmt;
   const totalRetPct = investAmt > 0 ? totalRet/investAmt*100 : 0;
 
+  // Col 1: มูลค่ารวม
   document.getElementById('sv-total').textContent = fmt(totalCur);
+
+  // Col 2: เงินออม — sum of savings/other type
+  const savingsOnly = savings.filter(s=>s.type==='savings'||s.type==='other');
+  const savingsCur  = savingsOnly.reduce((s,e)=>s+(e.currentValue>0?Number(e.currentValue):Number(e.amount||0)),0);
+  document.getElementById('sv-save-total').textContent = savingsCur > 0 ? fmt(savingsCur) : '—';
+
+  // Col 3: การลงทุน
+  document.getElementById('sv-inv-total').textContent = investAmt > 0 ? fmt(investCur) : '—';
+  document.getElementById('sv-inv-cost').textContent  = investAmt > 0 ? fmt(investAmt) : '—';
   const retEl = document.getElementById('sv-return');
   if (investWithVal.length) {
     retEl.textContent = (totalRet>=0?'+':'')+fmt(totalRet)+' ('+(totalRet>=0?'+':'')+totalRetPct.toFixed(2)+'%)';
