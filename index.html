@@ -113,7 +113,7 @@ html, body {
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -209,6 +209,27 @@ html, body {
 .filter-chip.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); font-weight: 500; }
 .filter-chip[data-filter="payer"].active { background: #eff6ff; border-color: #3b82f6; color: #2563eb; }
 .filter-chip[data-filter="type"].active { background: #f0fdf4; border-color: #22c55e; color: #16a34a; }
+
+/* ===== Record Mode Toggle ===== */
+.record-mode-toggle { display:flex; gap:0; margin-bottom:14px; background:var(--bg); border-radius:100px; padding:3px; border:1.5px solid var(--border); }
+.record-mode-btn { flex:1; padding:7px 0; border-radius:100px; border:none; background:transparent; font-size:13px; cursor:pointer; color:var(--text-2); font-family:inherit; transition:all 0.2s; font-weight:500; }
+.record-mode-btn.active { background:var(--surface); color:var(--text-1); box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+.record-mode-btn.income.active { color:var(--green); }
+
+/* ===== Health Panel ===== */
+.health-bal { text-align:center; padding:20px 16px; background:var(--surface); border-radius:var(--radius); margin-bottom:12px; box-shadow:var(--shadow); }
+.health-bal-label { font-size:12px; color:var(--text-2); margin-bottom:4px; }
+.health-bal-amount { font-size:30px; font-weight:700; }
+.health-bal-amount.pos { color:var(--green); }
+.health-bal-amount.neg { color:var(--red); }
+.health-row { display:flex; gap:10px; margin-bottom:10px; }
+.health-card { flex:1; background:var(--surface); border-radius:var(--radius-sm); padding:14px 12px; box-shadow:var(--shadow); }
+.health-card-label { font-size:11px; color:var(--text-2); margin-bottom:4px; font-weight:500; }
+.health-card-val { font-size:18px; font-weight:700; color:var(--text-1); }
+.health-bar-wrap { background:var(--border); border-radius:100px; height:8px; margin:10px 0 4px; overflow:hidden; }
+.health-bar-fill { height:100%; border-radius:100px; transition:width 0.4s; }
+.health-status { display:flex; align-items:center; gap:10px; padding:14px; background:var(--surface); border-radius:var(--radius-sm); box-shadow:var(--shadow); margin-bottom:10px; }
+.health-status-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 
 /* ===== Month Selector ===== */
 .month-selector { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -357,7 +378,11 @@ html, body {
 
     <!-- Tab 1: บันทึก -->
     <div class="tab-panel active" id="panel-record">
-      <div class="filter-section">
+      <div class="record-mode-toggle">
+        <button class="record-mode-btn active" id="mode-expense">📤 รายจ่าย</button>
+        <button class="record-mode-btn income" id="mode-income">📥 รายรับ</button>
+      </div>
+      <div class="filter-section" id="expense-filters">
         <div class="filter-row">
           <span class="filter-row-label">ผู้จ่าย</span>
           <div class="filter-chips">
@@ -380,6 +405,12 @@ html, body {
         <div class="empty-state">
           <div class="empty-icon">📋</div>
           <div class="empty-text">ยังไม่มีรายการ<br>กด + เพื่อเพิ่มรายจ่าย</div>
+        </div>
+      </div>
+      <div id="income-list" style="display:none">
+        <div class="empty-state">
+          <div class="empty-icon">📥</div>
+          <div class="empty-text">ยังไม่มีรายรับเดือนนี้<br>กด + เพื่อเพิ่มรายรับ</div>
         </div>
       </div>
     </div>
@@ -417,7 +448,58 @@ html, body {
       </div>
     </div>
 
-    <!-- Tab 3: งบประมาณ -->
+    <!-- Tab 3: สุขภาพการเงิน -->
+    <div class="tab-panel" id="panel-health">
+      <div class="month-selector">
+        <button class="month-btn" id="h-prev-month">‹</button>
+        <div class="month-label" id="h-month-label">—</div>
+        <button class="month-btn" id="h-next-month">›</button>
+      </div>
+      <div class="health-row">
+        <div class="health-card">
+          <div class="health-card-label">รายรับเดือนนี้</div>
+          <div class="health-card-val" style="color:var(--green)" id="h-income">฿0</div>
+        </div>
+        <div class="health-card">
+          <div class="health-card-label">รายจ่ายเดือนนี้</div>
+          <div class="health-card-val" style="color:var(--red)" id="h-expense">฿0</div>
+        </div>
+      </div>
+      <div class="health-bal">
+        <div class="health-bal-label">เงินคงเหลือ</div>
+        <div class="health-bal-amount" id="h-balance">฿0</div>
+        <div class="health-bar-wrap">
+          <div class="health-bar-fill" id="h-bar" style="width:0%;background:var(--green)"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-2)" id="h-bar-label">รายจ่าย 0% ของรายรับ</div>
+      </div>
+      <div class="health-status" id="h-status">
+        <div class="health-status-dot" id="h-status-dot" style="background:var(--text-3)"></div>
+        <div id="h-status-text" style="font-size:13px;color:var(--text-2)">บันทึกรายรับเพื่อดูสถานะ</div>
+      </div>
+      <div class="health-row">
+        <div class="health-card">
+          <div class="health-card-label">อัตราการออมเดือนนี้</div>
+          <div class="health-card-val" id="h-save-rate">—</div>
+        </div>
+        <div class="health-card">
+          <div class="health-card-label">Net Worth</div>
+          <div class="health-card-val" id="h-networth">฿0</div>
+        </div>
+      </div>
+      <div class="health-row">
+        <div class="health-card">
+          <div class="health-card-label">หนี้คงเหลือรวม</div>
+          <div class="health-card-val" style="color:var(--red)" id="h-debt">฿0</div>
+        </div>
+        <div class="health-card">
+          <div class="health-card-label">ออม + ลงทุนรวม</div>
+          <div class="health-card-val" style="color:var(--green)" id="h-savings">฿0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: งบประมาณ -->
     <div class="tab-panel" id="panel-budget">
       <div class="card">
         <div class="card-title">งบประมาณรายเดือน — กรอกแล้วกดบันทึก</div>
@@ -558,10 +640,11 @@ html, body {
   <nav class="tab-bar">
     <button class="tab-btn active" data-tab="record"><span class="tab-icon">📋</span><span>บันทึก</span></button>
     <button class="tab-btn" data-tab="summary"><span class="tab-icon">📊</span><span>สรุป</span></button>
+    <button class="tab-btn" data-tab="health"><span class="tab-icon">❤️</span><span>สุขภาพ</span></button>
     <button class="tab-btn" data-tab="budget"><span class="tab-icon">💰</span><span>งบ</span></button>
-    <button class="tab-btn" data-tab="debt"><span class="tab-icon">🏦</span><span>หนี้สิน</span></button>
+    <button class="tab-btn" data-tab="debt"><span class="tab-icon">🏦</span><span>หนี้</span></button>
     <button class="tab-btn" data-tab="savings"><span class="tab-icon">💎</span><span>ออม</span></button>
-    <button class="tab-btn" data-tab="guide"><span class="tab-icon">📖</span><span>วิธีใช้</span></button>
+    <button class="tab-btn" data-tab="guide"><span class="tab-icon">📖</span><span>คู่มือ</span></button>
   </nav>
 
   <button class="fab" id="fab-add">+</button>
@@ -725,6 +808,48 @@ html, body {
   </div>
 </div>
 
+<!-- Modal: รายรับ -->
+<div class="modal-overlay" id="income-modal">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="income-modal-title">เพิ่มรายรับ</div>
+    <div class="form-group">
+      <label class="form-label">วันที่</label>
+      <input type="date" class="form-input" id="inc-date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">จำนวนเงิน (บาท)</label>
+      <input type="number" class="form-input" id="inc-amount" placeholder="0" inputmode="decimal" min="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">หมวดหมู่</label>
+      <div class="pill-group" id="pg-inc-cat">
+        <button class="pill active" data-value="salary">💼 เงินเดือน</button>
+        <button class="pill" data-value="bonus">🎁 โบนัส</button>
+        <button class="pill" data-value="extra">💡 รายได้เสริม</button>
+        <button class="pill" data-value="other">📦 อื่นๆ</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ผู้รับ</label>
+      <div class="pill-group" id="pg-inc-member">
+        <button class="pill active" data-value="dad">พ่อ</button>
+        <button class="pill" data-value="mom">แม่</button>
+        <button class="pill" data-value="child">ลูก</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">รายละเอียด (ไม่บังคับ)</label>
+      <input type="text" class="form-input" id="inc-note" placeholder="เช่น เงินเดือน พ.ค.">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-ghost" style="flex:1" id="inc-cancel">ยกเลิก</button>
+      <button class="btn btn-primary" style="flex:2" id="inc-save">บันทึก</button>
+    </div>
+    <button class="btn btn-danger" style="width:100%;margin-top:8px;display:none" id="inc-delete">ลบรายการนี้</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- ===== Firebase + App Logic ===== -->
@@ -755,11 +880,12 @@ const db    = getFirestore(fbApp);
 
 // ===== State =====
 let uid = null;
-let expenses = [], debts = [], savings = [];
+let expenses = [], debts = [], savings = [], incomes = [];
 let budgets = {};
-let editExpId = null, editDebtId = null, editSvId = null;
-let summaryMonth = new Date();
+let editExpId = null, editDebtId = null, editSvId = null, editIncId = null;
+let summaryMonth = new Date(), healthMonth = new Date();
 let activeFilters = { payer: null, type: null };
+let recordMode = 'expense';
 let pieChart = null, barChart = null;
 
 // ===== Data =====
@@ -795,6 +921,13 @@ const SV_TYPES = {
   fund:    { name: 'กองทุน',   icon: '📈' },
   stock:   { name: 'หุ้น',     icon: '📊' },
   other:   { name: 'อื่นๆ',    icon: '💎' },
+};
+
+const INCOME_CATS = {
+  salary: { name: 'เงินเดือน',    icon: '💼', color: '#4361ee' },
+  bonus:  { name: 'โบนัส',        icon: '🎁', color: '#f4a261' },
+  extra:  { name: 'รายได้เสริม',  icon: '💡', color: '#2dc653' },
+  other:  { name: 'อื่นๆ',        icon: '📦', color: '#adb5bd' },
 };
 
 const PAYERS = { dad: 'พ่อ', mom: 'แม่', child: 'ลูก', both: 'ทั้งคู่' };
@@ -857,15 +990,19 @@ onAuthStateChanged(auth, user => {
 function subscribeAll() {
   onSnapshot(query(collection(db, `users/${uid}/expenses`), orderBy('date','desc')), snap => {
     expenses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderExpenses(); renderBudget();
+    renderExpenses(); renderBudget(); renderHealth();
   });
   onSnapshot(query(collection(db, `users/${uid}/debts`), orderBy('name')), snap => {
     debts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderDebts();
+    renderDebts(); renderHealth();
   });
   onSnapshot(query(collection(db, `users/${uid}/savings`), orderBy('date','desc')), snap => {
     savings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderSavings();
+    renderSavings(); renderHealth();
+  });
+  onSnapshot(query(collection(db, `users/${uid}/incomes`), orderBy('date','desc')), snap => {
+    incomes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderIncomes(); renderHealth();
   });
 }
 
@@ -885,8 +1022,109 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById(`panel-${tab}`).classList.add('active');
     document.getElementById('fab-add').style.display = tab === 'record' ? 'flex' : 'none';
     if (tab === 'summary') renderSummary();
+    if (tab === 'health') renderHealth();
   });
 });
+
+// ===== Record Mode Toggle =====
+document.getElementById('mode-expense').addEventListener('click', () => {
+  recordMode = 'expense';
+  document.getElementById('mode-expense').classList.add('active');
+  document.getElementById('mode-income').classList.remove('active');
+  document.getElementById('expense-list').style.display = 'block';
+  document.getElementById('income-list').style.display = 'none';
+  document.getElementById('expense-filters').style.display = 'flex';
+});
+document.getElementById('mode-income').addEventListener('click', () => {
+  recordMode = 'income';
+  document.getElementById('mode-income').classList.add('active');
+  document.getElementById('mode-expense').classList.remove('active');
+  document.getElementById('expense-list').style.display = 'none';
+  document.getElementById('income-list').style.display = 'block';
+  document.getElementById('expense-filters').style.display = 'none';
+  renderIncomes();
+});
+
+// ===== Income List =====
+function renderIncomes() {
+  const list = document.getElementById('income-list');
+  const now = new Date();
+  const items = incomes.filter(i => {
+    const d = new Date(i.date+'T00:00:00');
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  if (!items.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📥</div><div class="empty-text">ยังไม่มีรายรับเดือนนี้<br>กด + เพื่อเพิ่มรายรับ</div></div>`;
+    return;
+  }
+  list.innerHTML = items.map(i => {
+    const cat = INCOME_CATS[i.category] || INCOME_CATS.other;
+    return `<div class="expense-item" data-id="${i.id}" data-kind="income">
+      <div class="exp-icon" style="background:${cat.color}20;color:${cat.color}">${cat.icon}</div>
+      <div class="exp-info">
+        <div class="exp-name">${cat.name}${i.note ? ' · '+i.note : ''}</div>
+        <div class="exp-meta">${fmtDate(i.date)} · ${PAYERS[i.member]||i.member}</div>
+      </div>
+      <div class="exp-amount" style="color:var(--green)">+${fmt(i.amount)}</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('[data-kind="income"]').forEach(el =>
+    el.addEventListener('click', () => openIncomeModal(el.dataset.id))
+  );
+}
+
+// ===== Financial Health =====
+function renderHealth() {
+  const m = healthMonth.getMonth(), y = healthMonth.getFullYear();
+  document.getElementById('h-month-label').textContent = `${MONTHS_TH[m]} ${y+543}`;
+
+  const monthInc = incomes.filter(i => { const d = new Date(i.date+'T00:00:00'); return d.getMonth()===m && d.getFullYear()===y; })
+    .reduce((s,i) => s+Number(i.amount||0), 0);
+  const monthExp = expenses.filter(e => { const d = new Date(e.date+'T00:00:00'); return d.getMonth()===m && d.getFullYear()===y; })
+    .reduce((s,e) => s+Number(e.amount||0), 0);
+  const balance = monthInc - monthExp;
+  const totalDebt = debts.reduce((s,d) => s+Number(d.remaining||0), 0);
+  const totalSav  = savings.reduce((s,v) => s+Number(v.amount||0), 0);
+  const netWorth  = totalSav - totalDebt;
+  const monthSavAdded = savings.filter(v => { const d = new Date(v.date+'T00:00:00'); return d.getMonth()===m && d.getFullYear()===y; })
+    .reduce((s,v) => s+Number(v.amount||0), 0);
+
+  document.getElementById('h-income').textContent  = fmt(monthInc);
+  document.getElementById('h-expense').textContent = fmt(monthExp);
+
+  const balEl = document.getElementById('h-balance');
+  balEl.textContent  = (balance>=0?'+':'') + fmt(balance);
+  balEl.className    = 'health-bal-amount ' + (balance>=0?'pos':'neg');
+
+  const pct = monthInc>0 ? Math.min(100, Math.round(monthExp/monthInc*100)) : 0;
+  const barColor = pct<70 ? 'var(--green)' : pct<90 ? 'var(--orange)' : 'var(--red)';
+  document.getElementById('h-bar').style.width      = pct+'%';
+  document.getElementById('h-bar').style.background = barColor;
+  document.getElementById('h-bar-label').textContent = `รายจ่าย ${pct}% ของรายรับ`;
+
+  const saveRateEl = document.getElementById('h-save-rate');
+  saveRateEl.textContent = monthInc>0 ? Math.round(monthSavAdded/monthInc*100)+'%' : '—';
+  saveRateEl.style.color = monthInc>0 && monthSavAdded>0 ? 'var(--green)' : 'var(--text-1)';
+
+  const nwEl = document.getElementById('h-networth');
+  nwEl.textContent = (netWorth>=0?'+':'')+fmt(netWorth);
+  nwEl.style.color = netWorth>=0 ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('h-debt').textContent    = fmt(totalDebt);
+  document.getElementById('h-savings').textContent = fmt(totalSav);
+
+  let statusText, statusColor;
+  if (monthInc===0) { statusText='บันทึกรายรับเพื่อดูสถานะสุขภาพการเงิน'; statusColor='var(--text-3)'; }
+  else if (pct<70)  { statusText='สุขภาพดี — รายจ่ายน้อยกว่า 70% ของรายรับ 🟢'; statusColor='var(--green)'; }
+  else if (pct<90)  { statusText='พอใช้ — ควรลดรายจ่ายเพื่อเพิ่มเงินออม 🟡'; statusColor='var(--orange)'; }
+  else              { statusText='ระวัง — รายจ่ายเกิน 90% ของรายรับ 🔴'; statusColor='var(--red)'; }
+  document.getElementById('h-status-dot').style.background = statusColor;
+  document.getElementById('h-status-text').textContent     = statusText;
+  document.getElementById('h-status-text').style.color     = statusColor;
+}
+
+document.getElementById('h-prev-month').addEventListener('click', () => { healthMonth.setMonth(healthMonth.getMonth()-1); renderHealth(); });
+document.getElementById('h-next-month').addEventListener('click', () => { healthMonth.setMonth(healthMonth.getMonth()+1); renderHealth(); });
 
 // ===== Expense List =====
 function filteredExpenses() {
@@ -954,8 +1192,65 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
   });
 });
 
+// ===== Income Modal =====
+function openIncomeModal(id = null) {
+  editIncId = id;
+  document.getElementById('income-modal-title').textContent = id ? 'แก้ไขรายรับ' : 'เพิ่มรายรับ';
+  document.getElementById('inc-delete').style.display = id ? 'block' : 'none';
+  if (id) {
+    const inc = incomes.find(i => i.id === id);
+    if (inc) {
+      document.getElementById('inc-date').value   = inc.date;
+      document.getElementById('inc-amount').value = inc.amount;
+      document.getElementById('inc-note').value   = inc.note || '';
+      setPill('pg-inc-cat', inc.category || 'salary');
+      setPill('pg-inc-member', inc.member || 'dad');
+    }
+  } else {
+    document.getElementById('inc-date').value   = today();
+    document.getElementById('inc-amount').value = '';
+    document.getElementById('inc-note').value   = '';
+    setPill('pg-inc-cat','salary');
+    setPill('pg-inc-member','dad');
+  }
+  document.getElementById('income-modal').classList.add('open');
+}
+
+document.getElementById('inc-cancel').addEventListener('click', () =>
+  document.getElementById('income-modal').classList.remove('open'));
+
+document.getElementById('inc-save').addEventListener('click', async () => {
+  const amount = parseFloat(document.getElementById('inc-amount').value);
+  if (!amount || amount <= 0) { showToast('กรุณากรอกจำนวนเงิน'); return; }
+  const data = {
+    date:     document.getElementById('inc-date').value || today(),
+    amount,
+    category: getPill('pg-inc-cat') || 'salary',
+    member:   getPill('pg-inc-member') || 'dad',
+    note:     document.getElementById('inc-note').value.trim(),
+  };
+  try {
+    if (editIncId) {
+      await updateDoc(doc(db, `users/${uid}/incomes`, editIncId), data);
+      showToast('แก้ไขรายรับแล้ว');
+    } else {
+      await addDoc(collection(db, `users/${uid}/incomes`), data);
+      showToast('บันทึกรายรับแล้ว');
+    }
+    document.getElementById('income-modal').classList.remove('open');
+  } catch { showToast('เกิดข้อผิดพลาด'); }
+});
+
+document.getElementById('inc-delete').addEventListener('click', async () => {
+  if (!editIncId) return;
+  await deleteDoc(doc(db, `users/${uid}/incomes`, editIncId));
+  showToast('ลบรายการแล้ว');
+  document.getElementById('income-modal').classList.remove('open');
+});
+
 // ===== Expense Modal =====
 document.getElementById('fab-add').addEventListener('click', () => {
+  if (recordMode === 'income') { openIncomeModal(); return; }
   editExpId = null;
   document.getElementById('expense-modal-title').textContent = 'เพิ่มรายจ่าย';
   document.getElementById('in-date').value = today();
