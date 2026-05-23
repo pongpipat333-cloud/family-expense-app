@@ -237,6 +237,21 @@ html, body {
 .health-bar-fill { height:100%; border-radius:100px; transition:width 0.4s; }
 .health-status { display:flex; align-items:center; gap:10px; padding:14px; background:var(--surface); border-radius:var(--radius-sm); box-shadow:var(--shadow); margin-bottom:10px; }
 .health-status-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.health-chart-card { background:var(--surface); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); }
+.health-chart-title { font-size:12px; font-weight:700; color:var(--text-2); text-transform:uppercase; letter-spacing:.4px; margin-bottom:12px; }
+.h-donut-wrap { display:flex; align-items:center; gap:14px; }
+.h-donut-canvas { flex-shrink:0; }
+.h-legend { flex:1; min-width:0; }
+.h-legend-item { display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+.h-legend-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.h-legend-name { font-size:11px; color:var(--text-2); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.h-legend-amt { font-size:11px; font-weight:700; color:var(--text-1); flex-shrink:0; }
+.h-legend-pct { font-size:10px; color:var(--text-3); flex-shrink:0; width:28px; text-align:right; }
+.h-no-data { text-align:center; padding:30px 0; color:var(--text-3); font-size:13px; }
+.h-stat-row { display:flex; gap:10px; margin-bottom:10px; }
+.h-stat-mini { flex:1; background:var(--surface); border-radius:var(--radius-sm); padding:10px 12px; box-shadow:var(--shadow); }
+.h-stat-mini-label { font-size:10px; color:var(--text-3); font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+.h-stat-mini-val { font-size:16px; font-weight:800; margin-top:2px; }
 
 /* ===== Category Grid ===== */
 .cat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
@@ -607,6 +622,29 @@ html, body {
           <div class="health-card-label">ออม + ลงทุนรวม</div>
           <div class="health-card-val" style="color:var(--green)" id="h-savings">฿0</div>
         </div>
+      </div>
+      <!-- DTI + Emergency Fund -->
+      <div class="h-stat-row">
+        <div class="h-stat-mini">
+          <div class="h-stat-mini-label">DTI (หนี้/รายได้)</div>
+          <div class="h-stat-mini-val" id="h-dti2">—</div>
+        </div>
+        <div class="h-stat-mini">
+          <div class="h-stat-mini-label">🛡 Emergency Fund</div>
+          <div class="h-stat-mini-val" id="h-emfund">—</div>
+        </div>
+      </div>
+      <!-- Expense by category donut -->
+      <div class="health-chart-card">
+        <div class="health-chart-title">รายจ่ายแยกหมวด — เดือนนี้</div>
+        <div id="h-cat-wrap">
+          <div class="h-no-data">ยังไม่มีรายจ่ายเดือนนี้</div>
+        </div>
+      </div>
+      <!-- 6-month trend -->
+      <div class="health-chart-card">
+        <div class="health-chart-title">แนวโน้มรายรับ vs รายจ่าย — 6 เดือน</div>
+        <canvas id="h-trend-chart" height="160"></canvas>
       </div>
     </div>
 
@@ -1266,53 +1304,169 @@ function renderIncomes() {
 }
 
 // ===== Financial Health =====
+let hCatChart = null, hTrendChart = null;
+
 function renderHealth() {
   const m = healthMonth.getMonth(), y = healthMonth.getFullYear();
   document.getElementById('h-month-label').textContent = `${MONTHS_TH[m]} ${y+543}`;
 
-  const monthInc = incomes.filter(i => { const d = new Date(i.date+'T00:00:00'); return d.getMonth()===m && d.getFullYear()===y; })
-    .reduce((s,i) => s+Number(i.amount||0), 0);
-  const monthExp = expenses.filter(e => { const d = new Date(e.date+'T00:00:00'); return d.getMonth()===m && d.getFullYear()===y; })
-    .reduce((s,e) => s+Number(e.amount||0), 0);
-  const balance = monthInc - monthExp;
-  const totalDebt = debts.reduce((s,d) => s+Number(d.remaining||0), 0);
-  const totalSav  = savings.reduce((s,v) => s+Number(v.amount||0), 0);
-  const netWorth  = totalSav - totalDebt;
-  const monthSavAdded = savings.filter(v => { const d = new Date(v.date+'T00:00:00'); return d.getMonth()===m && d.getFullYear()===y; })
-    .reduce((s,v) => s+Number(v.amount||0), 0);
+  // ── Monthly income & expense ──────────────────────────────
+  const inMonth = i => { const d=new Date((i.date||'')+'T00:00:00'); return d.getMonth()===m&&d.getFullYear()===y; };
+  const monthInc = incomes.filter(inMonth).reduce((s,i)=>s+Number(i.amount||0),0);
+  const monthExp = expenses.filter(inMonth).reduce((s,e)=>s+Number(e.amount||0),0);
+  const balance  = monthInc - monthExp;
 
   document.getElementById('h-income').textContent  = fmt(monthInc);
   document.getElementById('h-expense').textContent = fmt(monthExp);
 
   const balEl = document.getElementById('h-balance');
-  balEl.textContent  = (balance>=0?'+':'') + fmt(balance);
-  balEl.className    = 'health-bal-amount ' + (balance>=0?'pos':'neg');
+  balEl.textContent = (balance>=0?'+':'')+fmt(balance);
+  balEl.className   = 'health-bal-amount '+(balance>=0?'pos':'neg');
 
   const pct = monthInc>0 ? Math.min(100, Math.round(monthExp/monthInc*100)) : 0;
-  const barColor = pct<70 ? 'var(--green)' : pct<90 ? 'var(--orange)' : 'var(--red)';
+  const barColor = pct<70?'var(--green)':pct<90?'var(--orange)':'var(--red)';
   document.getElementById('h-bar').style.width      = pct+'%';
   document.getElementById('h-bar').style.background = barColor;
   document.getElementById('h-bar-label').textContent = `รายจ่าย ${pct}% ของรายรับ`;
 
-  const saveRateEl = document.getElementById('h-save-rate');
-  saveRateEl.textContent = monthInc>0 ? Math.round(monthSavAdded/monthInc*100)+'%' : '—';
-  saveRateEl.style.color = monthInc>0 && monthSavAdded>0 ? 'var(--green)' : 'var(--text-1)';
-
-  const nwEl = document.getElementById('h-networth');
-  nwEl.textContent = (netWorth>=0?'+':'')+fmt(netWorth);
-  nwEl.style.color = netWorth>=0 ? 'var(--green)' : 'var(--red)';
-
-  document.getElementById('h-debt').textContent    = fmt(totalDebt);
-  document.getElementById('h-savings').textContent = fmt(totalSav);
-
+  // ── Status ───────────────────────────────────────────────
   let statusText, statusColor;
-  if (monthInc===0) { statusText='บันทึกรายรับเพื่อดูสถานะสุขภาพการเงิน'; statusColor='var(--text-3)'; }
+  if (!monthInc)    { statusText='บันทึกรายรับเพื่อดูสถานะสุขภาพการเงิน'; statusColor='var(--text-3)'; }
   else if (pct<70)  { statusText='สุขภาพดี — รายจ่ายน้อยกว่า 70% ของรายรับ 🟢'; statusColor='var(--green)'; }
   else if (pct<90)  { statusText='พอใช้ — ควรลดรายจ่ายเพื่อเพิ่มเงินออม 🟡'; statusColor='var(--orange)'; }
   else              { statusText='ระวัง — รายจ่ายเกิน 90% ของรายรับ 🔴'; statusColor='var(--red)'; }
   document.getElementById('h-status-dot').style.background = statusColor;
   document.getElementById('h-status-text').textContent     = statusText;
   document.getElementById('h-status-text').style.color     = statusColor;
+
+  // ── A: FIX Savings Rate = (รายรับ - รายจ่าย) / รายรับ ──
+  const saveRateEl = document.getElementById('h-save-rate');
+  if (monthInc>0) {
+    const sr = Math.round(balance/monthInc*100);
+    saveRateEl.textContent = sr+'%';
+    saveRateEl.style.color = sr>=20?'var(--green)':sr>=0?'var(--orange)':'var(--red)';
+  } else { saveRateEl.textContent='—'; saveRateEl.style.color='var(--text-1)'; }
+
+  // ── Net Worth ─────────────────────────────────────────────
+  const totalDebt = debts.reduce((s,d)=>s+Number(d.remaining||0),0);
+  const totalSav  = savings.reduce((s,v)=>s+Number(v.currentValue>0?v.currentValue:v.amount||0),0);
+  const netWorth  = totalSav - totalDebt;
+  const nwEl = document.getElementById('h-networth');
+  nwEl.textContent = (netWorth>=0?'+':'')+fmt(netWorth);
+  nwEl.style.color = netWorth>=0?'var(--green)':'var(--red)';
+  document.getElementById('h-debt').textContent    = fmt(totalDebt);
+  document.getElementById('h-savings').textContent = fmt(totalSav);
+
+  // ── DTI ──────────────────────────────────────────────────
+  const totalMonthly = debts.reduce((s,d)=>s+Number(d.monthly||0),0);
+  const dtiEl = document.getElementById('h-dti2');
+  if (monthInc>0 && totalMonthly>0) {
+    const dti = Math.round(totalMonthly/monthInc*100);
+    dtiEl.textContent = dti+'%';
+    dtiEl.style.color = dti<36?'var(--green)':dti<50?'var(--orange)':'var(--red)';
+  } else { dtiEl.textContent='—'; dtiEl.style.color='var(--text-3)'; }
+
+  // ── Emergency Fund ───────────────────────────────────────
+  const savingsOnly = savings.filter(s=>s.type==='savings'||s.type==='other'||!s.type);
+  const emFund = savingsOnly.reduce((s,v)=>s+Number(v.currentValue>0?v.currentValue:v.amount||0),0);
+  const avg3Exp = (() => {
+    let total=0, cnt=0;
+    for (let i=1;i<=3;i++) {
+      const mm = new Date(y,m-i,1);
+      const me = expenses.filter(e=>{const d=new Date((e.date||'')+'T00:00:00');return d.getMonth()===mm.getMonth()&&d.getFullYear()===mm.getFullYear();})
+        .reduce((s,e)=>s+Number(e.amount||0),0);
+      if (me>0){total+=me;cnt++;}
+    }
+    return cnt>0?total/cnt:monthExp||1;
+  })();
+  const emEl = document.getElementById('h-emfund');
+  if (emFund>0 && avg3Exp>0) {
+    const mos = (emFund/avg3Exp).toFixed(1);
+    emEl.textContent = mos+' เดือน';
+    emEl.style.color = mos>=6?'var(--green)':mos>=3?'var(--orange)':'var(--red)';
+  } else { emEl.textContent='—'; emEl.style.color='var(--text-3)'; }
+
+  // ── B: Expense Donut by Category ─────────────────────────
+  const catWrap = document.getElementById('h-cat-wrap');
+  const monthExpenses = expenses.filter(inMonth);
+  if (monthExpenses.length===0) {
+    catWrap.innerHTML = '<div class="h-no-data">ยังไม่มีรายจ่ายเดือนนี้</div>';
+    if (hCatChart) { hCatChart.destroy(); hCatChart=null; }
+  } else {
+    const catMap = {};
+    monthExpenses.forEach(e=>{
+      const k = e.type||'other';
+      catMap[k] = (catMap[k]||0)+Number(e.amount||0);
+    });
+    const sorted = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+    const top5 = sorted.slice(0,5);
+    const otherAmt = sorted.slice(5).reduce((s,[,v])=>s+v,0);
+    if (otherAmt>0) top5.push(['_other', otherAmt]);
+    const labels = top5.map(([k])=>k==='_other'?'อื่นๆ':(CATS[k]?.name||k));
+    const vals   = top5.map(([,v])=>v);
+    const colors = top5.map(([k])=>k==='_other'?'#D4D4D4':(CATS[k]?.color||'#aaa'));
+    const total  = vals.reduce((s,v)=>s+v,0);
+
+    catWrap.innerHTML = `<div class="h-donut-wrap">
+      <canvas id="h-cat-canvas" class="h-donut-canvas" width="130" height="130"></canvas>
+      <div class="h-legend" id="h-cat-legend"></div>
+    </div>`;
+
+    // Legend
+    const leg = document.getElementById('h-cat-legend');
+    leg.innerHTML = top5.map(([k,v],i)=>`
+      <div class="h-legend-item">
+        <div class="h-legend-dot" style="background:${colors[i]}"></div>
+        <div class="h-legend-name">${labels[i]}</div>
+        <div class="h-legend-amt">${fmt(v)}</div>
+        <div class="h-legend-pct">${Math.round(v/total*100)}%</div>
+      </div>`).join('');
+
+    setTimeout(()=>{
+      const canvas = document.getElementById('h-cat-canvas');
+      if (!canvas) return;
+      if (hCatChart) hCatChart.destroy();
+      hCatChart = new Chart(canvas,{
+        type:'doughnut',
+        data:{ datasets:[{ data:vals, backgroundColor:colors, borderWidth:2, borderColor:'#fff', hoverOffset:4 }] },
+        options:{ cutout:'65%', plugins:{legend:{display:false},tooltip:{enabled:false}}, animation:{duration:500} }
+      });
+    },80);
+  }
+
+  // ── C: 6-Month Trend Bar Chart ────────────────────────────
+  const trendLabels=[], trendInc=[], trendExp=[];
+  for (let i=5; i>=0; i--) {
+    const mm = new Date(y, m-i, 1);
+    const tm = mm.getMonth(), ty = mm.getFullYear();
+    const inM = e => { const d=new Date((e.date||'')+'T00:00:00'); return d.getMonth()===tm&&d.getFullYear()===ty; };
+    trendLabels.push(MONTHS_TH[tm].slice(0,3));
+    trendInc.push(incomes.filter(inM).reduce((s,x)=>s+Number(x.amount||0),0));
+    trendExp.push(expenses.filter(inM).reduce((s,x)=>s+Number(x.amount||0),0));
+  }
+  setTimeout(()=>{
+    const canvas = document.getElementById('h-trend-chart');
+    if (!canvas) return;
+    if (hTrendChart) hTrendChart.destroy();
+    hTrendChart = new Chart(canvas,{
+      type:'bar',
+      data:{
+        labels: trendLabels,
+        datasets:[
+          { label:'รายรับ', data:trendInc, backgroundColor:'rgba(45,198,83,.75)', borderRadius:4, borderSkipped:false },
+          { label:'รายจ่าย', data:trendExp, backgroundColor:'rgba(239,35,60,.65)', borderRadius:4, borderSkipped:false }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ position:'bottom', labels:{ font:{size:11}, boxWidth:10, padding:10 } }, tooltip:{ callbacks:{ label: ctx=>' '+fmt(ctx.raw) } } },
+        scales:{
+          x:{ grid:{display:false}, ticks:{font:{size:11}} },
+          y:{ grid:{color:'#f0f0f0'}, ticks:{ callback:v=>v>=1000?(v/1000).toFixed(0)+'k':'฿'+v, font:{size:10} } }
+        }
+      }
+    });
+  },80);
 }
 
 document.getElementById('h-prev-month').addEventListener('click', () => { healthMonth.setMonth(healthMonth.getMonth()-1); renderHealth(); });
