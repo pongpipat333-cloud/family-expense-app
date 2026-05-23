@@ -289,6 +289,11 @@ html, body {
 .debt-name { font-weight: 600; font-size: 15px; }
 .debt-sub { font-size: 12px; color: var(--text-2); margin-top: 3px; }
 .debt-remaining { color: var(--red); font-weight: 700; font-size: 16px; }
+.debt-payoff { display:flex; align-items:center; gap:6px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:12px; }
+.debt-payoff .po-label { color:var(--text-2); flex-shrink:0; }
+.debt-payoff .po-val { font-weight:600; color:var(--text-1); }
+.debt-payoff .po-warn { font-weight:600; color:var(--red); }
+.debt-payoff .po-pn  { color:var(--text-3); }
 
 /* ===== Savings ===== */
 .savings-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
@@ -1452,6 +1457,23 @@ document.getElementById('save-budget').addEventListener('click', async () => {
 });
 
 // ===== Debts =====
+function calcPayoffMonths(remaining, monthly, interestPct) {
+  if (monthly <= 0) return null;                         // PN – interest only
+  const r = (interestPct || 0) / 100 / 12;              // monthly rate
+  if (r === 0) return Math.ceil(remaining / monthly);    // no interest – simple
+  if (monthly <= remaining * r) return Infinity;         // payment < interest → never pays off
+  return Math.ceil(-Math.log(1 - (remaining * r) / monthly) / Math.log(1 + r));
+}
+function formatPayoff(remaining, monthly, interestPct) {
+  const n = calcPayoffMonths(remaining, monthly, interestPct);
+  if (n === null)      return `<span class="po-pn">💰 PN — จ่ายเฉพาะดอก ไม่หักต้น</span>`;
+  if (!isFinite(n))   return `<span class="po-warn">⚠️ ค่างวดน้อยกว่าดอกเบี้ยต่อเดือน</span>`;
+  const yrs = Math.floor(n / 12), mos = n % 12;
+  const txt = yrs > 0 && mos > 0 ? `${yrs} ปี ${mos} เดือน`
+            : yrs > 0 ? `${yrs} ปี` : `${mos} เดือน`;
+  return `<span class="po-val">⏳ ${txt}</span>`;
+}
+
 function renderDebts() {
   const total   = debts.reduce((s,d)=>s+Number(d.remaining||0),0);
   const monthly = debts.reduce((s,d)=>s+Number(d.monthly||0),0);
@@ -1469,12 +1491,16 @@ function renderDebts() {
       <div class="debt-header">
         <div>
           <div class="debt-name">${dt.icon} ${d.name}</div>
-          <div class="debt-sub">${dt.name} · งวดละ ${fmt(d.monthly)}/เดือน · เหลือ ${d.months||0} งวด${d.interest?` · ดอกเบี้ย ${d.interest}%`:''}</div>
+          <div class="debt-sub">${dt.name}${d.monthly > 0 ? ` · งวดละ ${fmt(d.monthly)}/เดือน` : ''}${d.interest ? ` · ดอกเบี้ย ${d.interest}%/ปี` : ''}${d.months ? ` · เหลือ ${d.months} งวด` : ''}</div>
         </div>
         <div class="debt-remaining">${fmt(d.remaining)}</div>
       </div>
-      ${d.originalAmount?`<div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:var(--green)"></div></div>
-        <div style="font-size:11px;color:var(--text-2);margin-top:2px">ผ่อนไปแล้ว ${pct}%</div>`:''}
+      ${d.originalAmount && pct > 0 ? `<div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:var(--green)"></div></div>
+        <div style="font-size:11px;color:var(--text-2);margin-top:2px">ผ่อนไปแล้ว ${pct}%</div>` : ''}
+      <div class="debt-payoff">
+        <span class="po-label">📅 คาดว่าหมดหนี้:</span>
+        ${formatPayoff(d.remaining, d.monthly, d.interest)}
+      </div>
     </div>`;
   }).join('');
 }
