@@ -532,7 +532,7 @@ html, body {
     <div class="tab-panel" id="panel-debt">
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-label">หนี้รวมทั้งหมด</div><div class="stat-value red" id="d-total">฿0</div></div>
-        <div class="stat-card"><div class="stat-label">ค่างวดต่อเดือน</div><div class="stat-value orange" id="d-monthly">฿0</div></div>
+        <div class="stat-card"><div class="stat-label">ค่างวดต่อเดือน</div><div class="stat-value orange" id="d-monthly-stat">฿0</div></div>
       </div>
       <div id="debt-list"></div>
       <button class="btn btn-primary" id="add-debt-btn" style="margin-top:4px">+ เพิ่มรายการหนี้</button>
@@ -1456,7 +1456,7 @@ function renderDebts() {
   const total   = debts.reduce((s,d)=>s+Number(d.remaining||0),0);
   const monthly = debts.reduce((s,d)=>s+Number(d.monthly||0),0);
   document.getElementById('d-total').textContent   = fmt(total);
-  document.getElementById('d-monthly').textContent = fmt(monthly);
+  document.getElementById('d-monthly-stat').textContent = fmt(monthly);
 
   if (!debts.length) {
     document.getElementById('debt-list').innerHTML = `<div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">ยังไม่มีรายการหนี้</div></div>`;
