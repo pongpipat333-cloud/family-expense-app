@@ -334,6 +334,13 @@ html, body {
 .sv-sum-val { font-size:24px; font-weight:800; color:var(--text-1); }
 .sv-sum-ret { font-size:14px; font-weight:700; }
 .sv-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.sv-section { margin-bottom:18px; }
+.sv-section-hdr { display:flex; justify-content:space-between; align-items:center; padding:6px 2px 8px; margin-bottom:8px; border-bottom:2px solid var(--border,#e8e8e8); }
+.sv-section-title { font-size:13px; font-weight:700; color:var(--text-2); letter-spacing:.4px; text-transform:uppercase; }
+.sv-section-sub { font-size:12px; color:var(--text-3); margin-top:2px; }
+.sv-section-amt { text-align:right; }
+.sv-section-amt-val { font-size:14px; font-weight:800; color:var(--text-1); }
+.sv-section-amt-ret { font-size:11px; font-weight:600; }
 .sv-card { background:var(--surface); border-radius:var(--radius); padding:14px 12px; box-shadow:var(--shadow); text-align:center; display:flex; flex-direction:column; align-items:center; }
 .sv-card-header { width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 .sv-card-name { font-size:14px; font-weight:700; color:var(--text-1); }
@@ -627,8 +634,8 @@ html, body {
           <div class="sv-sum-ret" id="sv-return">—</div>
         </div>
       </div>
-      <!-- Portfolio grid -->
-      <div id="savings-list" class="sv-grid"></div>
+      <!-- Portfolio sections -->
+      <div id="savings-list"></div>
       <button class="btn btn-primary" id="add-savings-btn" style="margin-top:4px">+ เพิ่มพอร์ต</button>
     </div>
 
@@ -1898,7 +1905,7 @@ function renderSavings() {
 
   const list = document.getElementById('savings-list');
   if (!savings.length) {
-    list.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-2)">ยังไม่มีพอร์ต<br>กด + เพิ่มพอร์ต เพื่อเริ่มต้น</div>`;
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-2)">ยังไม่มีพอร์ต<br>กด + เพิ่มพอร์ต เพื่อเริ่มต้น</div>`;
     return;
   }
 
@@ -1908,12 +1915,19 @@ function renderSavings() {
 
   const SV_PAL = ['#4361ee','#2dc653','#f4a261','#ef233c','#7b2d8b','#00b4d8','#ff9f1c','#06d6a0'];
 
-  list.innerHTML = savings.map((s,i) => {
-    const val     = s.currentValue > 0 ? s.currentValue : s.amount;
+  // Split into 2 groups — assign global color index for consistency
+  const savingsGroup = savings.map((s,i)=>({...s,_i:i})).filter(s=>s.type==='savings'||s.type==='other');
+  const investGroup  = savings.map((s,i)=>({...s,_i:i})).filter(s=>s.type!=='savings'&&s.type!=='other');
+
+  function sectionVal(e) { return e.currentValue > 0 ? e.currentValue : e.amount; }
+  function sectionTotal(arr) { return arr.reduce((s,e)=>s+sectionVal(e),0); }
+  function sectionInvested(arr) { return arr.reduce((s,e)=>s+Number(e.amount||0),0); }
+
+  function makeCard(s) {
+    const val     = sectionVal(s);
     const pct     = totalCur > 0 ? (val/totalCur*100).toFixed(1) : '0.0';
     const ret     = s.currentValue > 0 ? s.currentValue - s.amount : null;
     const retPct  = (ret!==null && s.amount>0) ? ret/s.amount*100 : 0;
-    const color   = SV_PAL[i % SV_PAL.length];
     const t       = SV_TYPES[s.type]||{name:s.type,icon:'💰'};
     return `<div class="sv-card">
       <div class="sv-card-header">
@@ -1924,30 +1938,59 @@ function renderSavings() {
         <canvas id="svc-${s.id}" width="120" height="120"></canvas>
         <div class="sv-chart-center">
           <div class="sv-chart-val">${fmt(val)}</div>
-          ${ret!==null ? `<div class="sv-chart-ret" style="color:${ret>=0?'var(--green)':'var(--red)'}">${ret>=0?'+':''}${retPct.toFixed(1)}%</div>` : ''}
+          ${ret!==null?`<div class="sv-chart-ret" style="color:${ret>=0?'var(--green)':'var(--red)'}">${ret>=0?'+':''}${retPct.toFixed(1)}%</div>`:''}
         </div>
       </div>
-      <div class="sv-card-sub">เติม ${fmt(s.amount)}${ret!==null?` · กำไร ${ret>=0?'+':''}${fmt(ret)}`:'  · ยังไม่ได้อัปเดตยอดจริง'}</div>
+      <div class="sv-card-sub">เติม ${fmt(s.amount)}${ret!==null?` · กำไร ${ret>=0?'+':''}${fmt(ret)}`:' · ยังไม่ได้อัปเดตยอดจริง'}</div>
       <div class="sv-card-btns">
         <button class="btn-sv-dep"  onclick="event.stopPropagation();window._depositSv('${s.id}')">+ เติมเงิน</button>
         <button class="btn-sv-edit" onclick="event.stopPropagation();window._editSv('${s.id}')">แก้ไข</button>
         <button class="btn-sv-del"  onclick="event.stopPropagation();window._delSv('${s.id}')">ลบ</button>
       </div>
     </div>`;
-  }).join('');
+  }
+
+  function makeSectionHdr(icon, label, arr) {
+    const cur  = sectionTotal(arr);
+    const inv  = sectionInvested(arr);
+    const ret  = cur - inv;
+    const haRet = arr.some(e=>e.currentValue>0);
+    const retHtml = haRet
+      ? `<div class="sv-section-amt-ret" style="color:${ret>=0?'var(--green)':'var(--red)'}">${ret>=0?'+':''}${fmt(ret)}</div>`
+      : '';
+    return `<div class="sv-section-hdr">
+      <div><div class="sv-section-title">${icon} ${label}</div><div class="sv-section-sub">${arr.length} พอร์ต · เติม ${fmt(inv)}</div></div>
+      <div class="sv-section-amt"><div class="sv-section-amt-val">${fmt(cur)}</div>${retHtml}</div>
+    </div>`;
+  }
+
+  let html = '';
+  if (savingsGroup.length) {
+    html += `<div class="sv-section">
+      ${makeSectionHdr('🏦','เงินออม',savingsGroup)}
+      <div class="sv-grid">${savingsGroup.map(makeCard).join('')}</div>
+    </div>`;
+  }
+  if (investGroup.length) {
+    html += `<div class="sv-section">
+      ${makeSectionHdr('📈','การลงทุน',investGroup)}
+      <div class="sv-grid">${investGroup.map(makeCard).join('')}</div>
+    </div>`;
+  }
+  list.innerHTML = html;
 
   // draw donut charts after DOM is painted
   setTimeout(() => {
     savings.forEach((s,i) => {
       const canvas = document.getElementById('svc-'+s.id);
       if (!canvas) return;
-      const val    = s.currentValue > 0 ? s.currentValue : s.amount;
+      const val    = sectionVal(s);
       const pct    = totalCur > 0 ? Math.max(0.5, val/totalCur*100) : 100;
       const rest   = Math.max(0, 100 - pct);
       const color  = SV_PAL[i % SV_PAL.length];
       svCharts[s.id] = new Chart(canvas, {
         type: 'doughnut',
-        data: { datasets: [{ data: [pct, rest], backgroundColor: [color, getComputedStyle(document.documentElement).getPropertyValue('--surface-2').trim()||'#e8e8e8'], borderWidth: 0, hoverOffset: 0 }] },
+        data: { datasets: [{ data:[pct,rest], backgroundColor:[color,'#e8ecf0'], borderWidth:0, hoverOffset:0 }] },
         options: { cutout:'72%', plugins:{legend:{display:false},tooltip:{enabled:false}}, animation:{duration:500} }
       });
     });
