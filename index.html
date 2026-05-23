@@ -1596,6 +1596,12 @@ function renderDebts() {
       </div>
       ${d.originalAmount && pct > 0 ? `<div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:var(--green)"></div></div>
         <div style="font-size:11px;color:var(--text-2);margin-top:2px">ผ่อนไปแล้ว ${pct}%</div>` : ''}
+      ${d.interest > 0 ? `<div class="debt-payoff" style="margin-top:4px">
+        <span class="po-label">💸 ดอกเบี้ย/เดือน:</span>
+        <span class="po-val" style="color:var(--red)">${fmt(d.remaining * d.interest / 100 / 12)}</span>
+        ${d.monthly > 0 ? `<span class="po-label" style="margin-left:6px">ต้นลดจริง:</span>
+        <span class="po-val" style="color:var(--green)">${fmt(Math.max(0, d.monthly - d.remaining * d.interest / 100 / 12))}</span>` : ''}
+      </div>` : ''}
       <div class="debt-payoff">
         <span class="po-label">📅 คาดว่าหมดหนี้:</span>
         ${formatPayoff(d.remaining, d.monthly, d.interest)}
