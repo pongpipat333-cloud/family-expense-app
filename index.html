@@ -1507,27 +1507,38 @@ document.getElementById('debt-save').addEventListener('click', async () => {
   const name      = document.getElementById('d-name').value.trim();
   const remaining = parseFloat(document.getElementById('d-remaining').value);
   const monthly   = parseFloat(document.getElementById('d-monthly').value);
-  if (!name||!remaining||!monthly) { showToast('กรุณากรอกข้อมูลให้ครบ'); return; }
+  if (!name)      { showToast('กรุณากรอกชื่อรายการ'); return; }
+  if (!remaining) { showToast('กรุณากรอกยอดหนี้คงเหลือ'); return; }
+  if (!monthly)   { showToast('กรุณากรอกค่างวดต่อเดือน'); return; }
   const data = {
     name, type: document.getElementById('d-type').value, remaining, monthly,
     months: parseInt(document.getElementById('d-months').value)||0,
     interest: parseFloat(document.getElementById('d-interest').value)||0,
   };
-  if (editDebtId) {
-    await updateDoc(doc(db,`users/${uid}/debts/${editDebtId}`), data);
-    showToast('แก้ไขแล้ว');
-  } else {
-    await addDoc(collection(db,`users/${uid}/debts`), { ...data, originalAmount: remaining });
-    showToast('บันทึกแล้ว');
+  try {
+    if (editDebtId) {
+      await updateDoc(doc(db, 'users', uid, 'debts', editDebtId), data);
+      showToast('แก้ไขแล้ว');
+    } else {
+      await addDoc(collection(db, 'users', uid, 'debts'), { ...data, originalAmount: remaining });
+      showToast('บันทึกแล้ว');
+    }
+    document.getElementById('debt-modal').classList.remove('open');
+  } catch(e) {
+    console.error(e);
+    showToast('บันทึกไม่สำเร็จ: ' + (e.code || e.message));
   }
-  document.getElementById('debt-modal').classList.remove('open');
 });
 
 document.getElementById('debt-delete').addEventListener('click', async () => {
   if (!editDebtId||!confirm('ลบรายการหนี้นี้?')) return;
-  await deleteDoc(doc(db,`users/${uid}/debts/${editDebtId}`));
-  showToast('ลบแล้ว');
-  document.getElementById('debt-modal').classList.remove('open');
+  try {
+    await deleteDoc(doc(db, 'users', uid, 'debts', editDebtId));
+    showToast('ลบแล้ว');
+    document.getElementById('debt-modal').classList.remove('open');
+  } catch(e) {
+    showToast('ลบไม่สำเร็จ: ' + (e.code || e.message));
+  }
 });
 
 // ===== Savings =====
