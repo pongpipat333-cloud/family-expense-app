@@ -818,7 +818,11 @@ html, body {
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">ยอดหนี้คงเหลือ (บาท)</label>
+      <label class="form-label">วงเงินกู้จริง (บาท) <span style="font-weight:400;color:var(--text-3)">— ยอดเมื่อกู้ครั้งแรก</span></label>
+      <input type="number" class="form-input" id="d-original" placeholder="0" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ยอดหนี้คงเหลือปัจจุบัน (บาท)</label>
       <input type="number" class="form-input" id="d-remaining" placeholder="0" inputmode="decimal">
     </div>
     <div class="form-group">
@@ -1586,13 +1590,18 @@ function renderDebts() {
   document.getElementById('debt-list').innerHTML = debts.map(d => {
     const dt  = DEBT_TYPES[d.type]||{name:d.type,icon:'💳'};
     const pct = d.originalAmount ? Math.round((1-d.remaining/d.originalAmount)*100) : 0;
+    const hasOriginal = d.originalAmount && d.originalAmount > d.remaining;
     return `<div class="debt-item" onclick="window._editDebt('${d.id}')">
       <div class="debt-header">
         <div>
           <div class="debt-name">${dt.icon} ${d.name}</div>
           <div class="debt-sub">${dt.name}${d.monthly > 0 ? ` · งวดละ ${fmt(d.monthly)}/เดือน` : ''}${d.interest ? ` · ดอกเบี้ย ${d.interest}%/ปี` : ''}${d.months ? ` · เหลือ ${d.months} งวด` : ''}</div>
         </div>
-        <div class="debt-remaining">${fmt(d.remaining)}</div>
+        <div style="text-align:right">
+          ${hasOriginal ? `<div style="font-size:11px;color:var(--text-3);margin-bottom:2px">วงเงินกู้ ${fmt(d.originalAmount)}</div>` : ''}
+          <div class="debt-remaining">${fmt(d.remaining)}</div>
+          ${hasOriginal ? `<div style="font-size:10px;color:var(--text-3)">ยอดปัจจุบัน</div>` : ''}
+        </div>
       </div>
       ${d.originalAmount && pct > 0 ? `<div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:var(--green)"></div></div>
         <div style="font-size:11px;color:var(--text-2);margin-top:2px">ผ่อนไปแล้ว ${pct}%</div>` : ''}
@@ -1618,6 +1627,7 @@ window._editDebt = id => {
   editDebtId = id;
   document.getElementById('d-name').value      = d.name;
   document.getElementById('d-type').value      = d.type;
+  document.getElementById('d-original').value  = d.originalAmount || '';
   document.getElementById('d-remaining').value = d.remaining;
   document.getElementById('d-monthly').value   = d.monthly;
   document.getElementById('d-months').value    = d.months||0;
@@ -1628,7 +1638,7 @@ window._editDebt = id => {
 
 document.getElementById('add-debt-btn').addEventListener('click', () => {
   editDebtId = null;
-  ['d-name','d-remaining','d-monthly','d-months','d-interest'].forEach(id => document.getElementById(id).value = '');
+  ['d-name','d-original','d-remaining','d-monthly','d-months','d-interest'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('d-type').value = 'house';
   document.getElementById('debt-delete').style.display = 'none';
   document.getElementById('debt-modal').classList.add('open');
@@ -1644,17 +1654,20 @@ document.getElementById('debt-save').addEventListener('click', async () => {
   if (!name)               { showToast('กรุณากรอกชื่อรายการ'); return; }
   if (!remaining || remaining <= 0) { showToast('กรุณากรอกยอดหนี้คงเหลือ'); return; }
   if (isNaN(monthly) || monthly < 0) { showToast('กรุณากรอกค่างวดต่อเดือน'); return; }
+  const originalRaw = parseFloat(document.getElementById('d-original').value);
+  const originalAmount = (!isNaN(originalRaw) && originalRaw > 0) ? originalRaw : remaining;
   const data = {
     name, type: document.getElementById('d-type').value, remaining, monthly,
     months: parseInt(document.getElementById('d-months').value)||0,
     interest: parseFloat(document.getElementById('d-interest').value)||0,
+    originalAmount,
   };
   try {
     if (editDebtId) {
       await updateDoc(doc(db, 'users', uid, 'debts', editDebtId), data);
       showToast('แก้ไขแล้ว');
     } else {
-      await addDoc(collection(db, 'users', uid, 'debts'), { ...data, originalAmount: remaining });
+      await addDoc(collection(db, 'users', uid, 'debts'), data);
       showToast('บันทึกแล้ว');
     }
     document.getElementById('debt-modal').classList.remove('open');
