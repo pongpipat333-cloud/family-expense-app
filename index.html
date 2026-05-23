@@ -362,6 +362,24 @@ html, body {
 .btn-sv-dep  { background:#ffd166; color:#5a3e00; border-color:#f0c040; }
 .btn-sv-edit { background:var(--accent-bg); color:var(--accent); border-color:var(--accent); }
 .btn-sv-del  { background:var(--red-bg); color:var(--red); border-color:var(--red); }
+/* ⋯ dropdown */
+.sv-card-wrap { position:relative; }
+.sv-more-btn { background:none; border:none; font-size:18px; color:var(--text-3); cursor:pointer; padding:0 4px; border-radius:6px; line-height:1; flex-shrink:0; }
+.sv-more-btn:hover { color:var(--text-1); background:var(--bg); }
+.sv-more-menu { position:absolute; right:8px; top:38px; background:var(--surface); border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,.15); padding:4px; z-index:300; min-width:108px; display:none; }
+.sv-more-menu.open { display:block; }
+.sv-more-menu button { display:block; width:100%; text-align:left; padding:9px 13px; border:none; background:none; cursor:pointer; border-radius:7px; font-size:12px; font-family:inherit; color:var(--text-1); }
+.sv-more-menu button:hover { background:var(--bg); }
+.sv-more-del { color:var(--red) !important; }
+/* Savings progress card */
+.sv-card-save { background:var(--surface); border-radius:var(--radius); padding:14px 14px 12px; box-shadow:var(--shadow); }
+.sv-save-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; }
+.sv-save-name { font-size:13px; font-weight:700; color:var(--text-1); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sv-save-amt { font-size:20px; font-weight:800; color:var(--text-1); margin:6px 0 10px; }
+.sv-progress-bar { height:8px; background:#e8ecf0; border-radius:4px; overflow:hidden; }
+.sv-progress-fill { height:100%; border-radius:4px; transition:width .6s ease; }
+.sv-progress-info { display:flex; justify-content:space-between; font-size:11px; color:var(--text-3); margin-top:4px; margin-bottom:10px; }
+.sv-dep-btn { width:100%; padding:8px; background:#ffd166; color:#5a3e00; border:1.5px solid #f0c040; border-radius:8px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; }
 
 /* ===== Savings ===== */
 .savings-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
@@ -934,7 +952,11 @@ html, body {
       <label class="form-label">ยอดที่เติมทั้งหมด (บาท)</label>
       <input type="number" class="form-input" id="sv-amount" placeholder="0" inputmode="decimal">
     </div>
-    <div class="form-group">
+    <div class="form-group" id="sv-goal-group">
+      <label class="form-label">เป้าหมาย (บาท) <span style="font-weight:400;color:var(--text-3)">— แสดง progress bar</span></label>
+      <input type="number" class="form-input" id="sv-goal" placeholder="ไม่บังคับ" inputmode="decimal">
+    </div>
+    <div class="form-group" id="sv-current-group" style="display:none">
       <label class="form-label">ยอดจริง ณ ตอนนี้ (บาท) <span style="font-weight:400;color:var(--text-3)">— อัปเดตเมื่ออยากดูผลตอบแทน</span></label>
       <input type="number" class="form-input" id="sv-current" placeholder="ไม่บังคับ" inputmode="decimal">
     </div>
@@ -1958,29 +1980,66 @@ function renderSavings() {
   function sectionTotal(arr) { return arr.reduce((s,e)=>s+sectionVal(e),0); }
   function sectionInvested(arr) { return arr.reduce((s,e)=>s+Number(e.amount||0),0); }
 
-  function makeCard(s) {
-    const val     = sectionVal(s);
-    const pct     = totalCur > 0 ? (val/totalCur*100).toFixed(1) : '0.0';
-    const ret     = s.currentValue > 0 ? s.currentValue - s.amount : null;
-    const retPct  = (ret!==null && s.amount>0) ? ret/s.amount*100 : 0;
-    const t       = SV_TYPES[s.type]||{name:s.type,icon:'💰'};
-    return `<div class="sv-card">
-      <div class="sv-card-header">
-        <div class="sv-card-name">${t.icon} ${s.name||s.note||t.name}</div>
-        <div class="sv-card-pct">${pct}%</div>
-      </div>
-      <div class="sv-chart-wrap">
-        <canvas id="svc-${s.id}" width="120" height="120"></canvas>
-        <div class="sv-chart-center">
-          <div class="sv-chart-val">${fmt(val)}</div>
-          ${ret!==null?`<div class="sv-chart-ret" style="color:${ret>=0?'var(--green)':'var(--red)'}">${ret>=0?'+':''}${retPct.toFixed(1)}%</div>`:''}
+  // Savings card: progress bar style
+  function makeSavingsCard(s) {
+    const val   = sectionVal(s);
+    const color = SV_PAL[s._i % SV_PAL.length];
+    const t     = SV_TYPES[s.type]||{name:s.type,icon:'💰'};
+    const goal  = Number(s.goal)||0;
+    const prog  = goal > 0 ? Math.min(100, val/goal*100) : 0;
+    const moreMenu = `<div class="sv-more-menu" id="sv-menu-${s.id}">
+      <button onclick="window._editSv('${s.id}')">✏️ แก้ไข</button>
+      <button class="sv-more-del" onclick="window._delSv('${s.id}')">🗑 ลบ</button>
+    </div>`;
+    return `<div class="sv-card-wrap">
+      <div class="sv-card-save">
+        <div class="sv-save-header">
+          <div class="sv-save-name">${t.icon} ${s.name||s.note||t.name}</div>
+          <button class="sv-more-btn" onclick="event.stopPropagation();window._toggleMenu('${s.id}')">⋯</button>
+          ${moreMenu}
         </div>
+        <div class="sv-save-amt">${fmt(val)}</div>
+        ${goal > 0
+          ? `<div class="sv-progress-bar"><div class="sv-progress-fill" style="width:${prog.toFixed(1)}%;background:${color}"></div></div>
+             <div class="sv-progress-info"><span style="font-weight:700;color:${color}">${prog.toFixed(0)}%</span><span>เป้า ${fmt(goal)}</span></div>`
+          : `<div style="font-size:11px;color:var(--text-3);margin-bottom:10px">ยังไม่ตั้งเป้าหมาย</div>`}
+        <button class="sv-dep-btn" onclick="window._depositSv('${s.id}')">+ เติมเงิน</button>
       </div>
-      <div class="sv-card-sub">เติม ${fmt(s.amount)}${ret!==null?` · กำไร ${ret>=0?'+':''}${fmt(ret)}`:' · ยังไม่ได้อัปเดตยอดจริง'}</div>
-      <div class="sv-card-btns">
-        <button class="btn-sv-dep"  onclick="event.stopPropagation();window._depositSv('${s.id}')">+ เติมเงิน</button>
-        <button class="btn-sv-edit" onclick="event.stopPropagation();window._editSv('${s.id}')">แก้ไข</button>
-        <button class="btn-sv-del"  onclick="event.stopPropagation();window._delSv('${s.id}')">ลบ</button>
+    </div>`;
+  }
+
+  // Investment card: donut chart style
+  function makeInvestCard(s) {
+    const val    = sectionVal(s);
+    const pct    = totalCur > 0 ? (val/totalCur*100).toFixed(1) : '0.0';
+    const ret    = s.currentValue > 0 ? s.currentValue - s.amount : null;
+    const retPct = (ret!==null && s.amount>0) ? ret/s.amount*100 : 0;
+    const t      = SV_TYPES[s.type]||{name:s.type,icon:'💰'};
+    const moreMenu = `<div class="sv-more-menu" id="sv-menu-${s.id}">
+      <button onclick="window._editSv('${s.id}')">✏️ แก้ไข</button>
+      <button class="sv-more-del" onclick="window._delSv('${s.id}')">🗑 ลบ</button>
+    </div>`;
+    return `<div class="sv-card-wrap">
+      <div class="sv-card">
+        <div class="sv-card-header">
+          <div class="sv-card-name">${t.icon} ${s.name||s.note||t.name}</div>
+          <div style="display:flex;align-items:center;gap:3px">
+            <div class="sv-card-pct">${pct}%</div>
+            <button class="sv-more-btn" onclick="event.stopPropagation();window._toggleMenu('${s.id}')">⋯</button>
+            ${moreMenu}
+          </div>
+        </div>
+        <div class="sv-chart-wrap">
+          <canvas id="svc-${s.id}" width="120" height="120"></canvas>
+          <div class="sv-chart-center">
+            <div class="sv-chart-val">${fmt(val)}</div>
+            ${ret!==null?`<div class="sv-chart-ret" style="color:${ret>=0?'var(--green)':'var(--red)'}">${ret>=0?'+':''}${retPct.toFixed(1)}%</div>`:''}
+          </div>
+        </div>
+        <div class="sv-card-sub">เติม ${fmt(s.amount)}${ret!==null?` · กำไร ${ret>=0?'+':''}${fmt(ret)}`:' · ยังไม่ได้อัปเดตยอดจริง'}</div>
+        <div class="sv-card-btns">
+          <button class="btn-sv-dep" onclick="window._depositSv('${s.id}')">+ เติมเงิน</button>
+        </div>
       </div>
     </div>`;
   }
@@ -2003,13 +2062,13 @@ function renderSavings() {
   if (savingsGroup.length) {
     html += `<div class="sv-section">
       ${makeSectionHdr('🏦','เงินออม',savingsGroup)}
-      <div class="sv-grid">${savingsGroup.map(makeCard).join('')}</div>
+      <div class="sv-grid">${savingsGroup.map(makeSavingsCard).join('')}</div>
     </div>`;
   }
   if (investGroup.length) {
     html += `<div class="sv-section">
       ${makeSectionHdr('📈','การลงทุน',investGroup)}
-      <div class="sv-grid">${investGroup.map(makeCard).join('')}</div>
+      <div class="sv-grid">${investGroup.map(makeInvestCard).join('')}</div>
     </div>`;
   }
   list.innerHTML = html;
@@ -2035,14 +2094,39 @@ function renderSavings() {
 let svCharts = {};
 let depositSvId = null;
 
+// ⋯ dropdown menu
+window._toggleMenu = (id) => {
+  const menu = document.getElementById('sv-menu-'+id);
+  const isOpen = menu && menu.classList.contains('open');
+  document.querySelectorAll('.sv-more-menu').forEach(m=>m.classList.remove('open'));
+  if (!isOpen && menu) menu.classList.add('open');
+};
+document.addEventListener('click', () => {
+  document.querySelectorAll('.sv-more-menu').forEach(m=>m.classList.remove('open'));
+});
+
+// Show/hide goal vs currentValue based on savings type
+function svTypeChanged(type) {
+  const isSavings = type==='savings'||type==='other';
+  document.getElementById('sv-goal-group').style.display    = isSavings ? '' : 'none';
+  document.getElementById('sv-current-group').style.display = isSavings ? 'none' : '';
+}
+document.getElementById('pg-sv-type').addEventListener('click', e => {
+  const pill = e.target.closest('.pill');
+  if (pill) svTypeChanged(pill.dataset.value);
+});
+
 window._editSv = id => {
   const s = savings.find(x=>x.id===id); if(!s) return;
   editSvId = id;
   document.getElementById('sv-modal-title').textContent = 'แก้ไขพอร์ต';
   document.getElementById('sv-name').value    = s.name || s.note || '';
   document.getElementById('sv-amount').value  = s.amount;
+  document.getElementById('sv-goal').value    = s.goal || '';
   document.getElementById('sv-current').value = s.currentValue || '';
-  setPill('pg-sv-type', s.type||'savings');
+  const type = s.type||'savings';
+  setPill('pg-sv-type', type);
+  svTypeChanged(type);
   document.getElementById('sv-delete').style.display = 'block';
   document.getElementById('savings-modal').classList.add('open');
 };
@@ -2065,8 +2149,10 @@ window._depositSv = id => {
 document.getElementById('add-savings-btn').addEventListener('click', () => {
   editSvId = null;
   document.getElementById('sv-modal-title').textContent = 'เพิ่มพอร์ต';
-  document.getElementById('sv-name').value = document.getElementById('sv-amount').value = document.getElementById('sv-current').value = '';
+  document.getElementById('sv-name').value = document.getElementById('sv-amount').value =
+    document.getElementById('sv-current').value = document.getElementById('sv-goal').value = '';
   setPill('pg-sv-type','savings');
+  svTypeChanged('savings');
   document.getElementById('sv-delete').style.display = 'none';
   document.getElementById('savings-modal').classList.add('open');
 });
@@ -2079,10 +2165,13 @@ document.getElementById('sv-save').addEventListener('click', async () => {
   const amount = parseFloat(document.getElementById('sv-amount').value);
   if (!name)          { showToast('กรุณากรอกชื่อพอร์ต'); return; }
   if (!amount||amount<=0) { showToast('กรุณากรอกยอดที่เติม'); return; }
+  const type = getPill('pg-sv-type');
+  const isSv = type==='savings'||type==='other';
   const data = {
     name, amount,
-    currentValue: parseFloat(document.getElementById('sv-current').value)||0,
-    type: getPill('pg-sv-type'),
+    goal: isSv ? (parseFloat(document.getElementById('sv-goal').value)||0) : 0,
+    currentValue: isSv ? 0 : (parseFloat(document.getElementById('sv-current').value)||0),
+    type,
     updatedAt: new Date().toISOString(),
   };
   try {
