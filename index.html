@@ -1362,14 +1362,25 @@ function renderSummary() {
     options: { responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{callback:v=>'฿'+v.toLocaleString()}} } }
   });
 
-  let html = catList.length ? '' : '<div style="text-align:center;padding:16px;color:var(--text-2);font-size:14px">ไม่มีข้อมูล</div>';
+  let html = catList.length ? '' : '<div style="text-align:center;padding:20px;color:var(--text-2);font-size:14px">ไม่มีข้อมูล</div>';
   catList.forEach(([k,v]) => {
-    const cat = CATS[k]||{name:k,icon:'📌'};
+    const cat = CATS[k]||{name:k,icon:'📌',color:'#adb5bd'};
     const pct = total ? Math.round(v/total*100) : 0;
-    html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:20px">${cat.icon}</span>
-      <div style="flex:1"><div style="font-size:14px;font-weight:500">${cat.name}</div><div style="font-size:12px;color:var(--text-2)">${pct}%</div></div>
-      <div style="font-weight:600;font-size:14px">${fmt(v)}</div>
+    html += `
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <div style="width:34px;height:34px;border-radius:10px;background:${cat.color}20;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${cat.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cat.name}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:14px;font-weight:700">${fmt(v)}</div>
+          <div style="font-size:11px;color:var(--text-2)">${pct}%</div>
+        </div>
+      </div>
+      <div style="background:var(--border);border-radius:100px;height:6px;overflow:hidden;margin-left:44px">
+        <div style="width:${pct}%;height:100%;background:${cat.color};border-radius:100px;transition:width 0.4s"></div>
+      </div>
     </div>`;
   });
   document.getElementById('cat-breakdown').innerHTML = html;
