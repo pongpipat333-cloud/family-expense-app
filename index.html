@@ -1878,31 +1878,6 @@ window._deletePayment = async (debtId, paymentId, balanceBefore) => {
 
 // ===== Savings =====
 function renderSavings() {
-  const total     = savings.reduce((s,e)=>s+Number(e.amount),0);
-  // only count entries that have currentValue set
-  const withVal   = savings.filter(e=>e.currentValue>0);
-  const invested  = withVal.reduce((s,e)=>s+Number(e.amount),0);
-  const curTotal  = withVal.reduce((s,e)=>s+Number(e.currentValue),0);
-  const ret       = curTotal - invested;
-  const retPct    = invested > 0 ? ret/invested*100 : 0;
-
-  document.getElementById('sv-cur-total').textContent = withVal.length ? fmt(curTotal) : '—';
-  const retEl  = document.getElementById('sv-return');
-  const retPEl = document.getElementById('sv-return-pct');
-  if (withVal.length) {
-    retEl.textContent   = (ret >= 0 ? '+' : '') + fmt(ret);
-    retEl.style.color   = ret >= 0 ? 'var(--green)' : 'var(--red)';
-    retPEl.textContent  = (ret >= 0 ? '+' : '') + retPct.toFixed(2) + '%';
-    retPEl.style.color  = ret >= 0 ? 'var(--green)' : 'var(--red)';
-  } else {
-    retEl.textContent = '—'; retEl.style.color = 'var(--text-3)'; retPEl.textContent = '';
-  }
-
-  const now = new Date();
-  const monthly = savings.filter(e=>{
-    const d = new Date(e.date+'T00:00:00');
-    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
-  }).reduce((s,e)=>s+Number(e.amount),0);
   // Summary header
   const totalInvested = savings.reduce((s,e)=>s+Number(e.amount||0),0);
   const withVal = savings.filter(e=>e.currentValue>0);
