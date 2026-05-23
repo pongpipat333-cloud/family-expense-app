@@ -118,13 +118,20 @@ html, body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 .tab-btn {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   background: none; border: none; cursor: pointer;
   color: var(--text-3); font-size: 10px; font-family: inherit;
-  padding: 4px 0; transition: color 0.15s;
+  padding: 6px 2px 4px; transition: all 0.18s;
+  position: relative; border-top: 2.5px solid transparent;
 }
-.tab-btn.active { color: var(--accent); }
-.tab-icon { font-size: 20px; line-height: 1; }
+.tab-btn.active {
+  color: var(--accent);
+  border-top-color: var(--accent);
+  background: var(--accent-bg);
+}
+.tab-btn.active .tab-icon { transform: scale(1.15); }
+.tab-btn span:not(.tab-icon) { font-weight: 600; }
+.tab-icon { font-size: 20px; line-height: 1; transition: transform 0.18s; }
 
 /* ===== Components ===== */
 .card { background: var(--surface); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); margin-bottom: 12px; }
