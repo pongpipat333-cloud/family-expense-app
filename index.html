@@ -1507,9 +1507,9 @@ document.getElementById('debt-save').addEventListener('click', async () => {
   const name      = document.getElementById('d-name').value.trim();
   const remaining = parseFloat(document.getElementById('d-remaining').value);
   const monthly   = parseFloat(document.getElementById('d-monthly').value);
-  if (!name)      { showToast('กรุณากรอกชื่อรายการ'); return; }
-  if (!remaining) { showToast('กรุณากรอกยอดหนี้คงเหลือ'); return; }
-  if (!monthly)   { showToast('กรุณากรอกค่างวดต่อเดือน'); return; }
+  if (!name)               { showToast('กรุณากรอกชื่อรายการ'); return; }
+  if (!remaining || remaining <= 0) { showToast('กรุณากรอกยอดหนี้คงเหลือ'); return; }
+  if (isNaN(monthly) || monthly < 0) { showToast('กรุณากรอกค่างวดต่อเดือน'); return; }
   const data = {
     name, type: document.getElementById('d-type').value, remaining, monthly,
     months: parseInt(document.getElementById('d-months').value)||0,
