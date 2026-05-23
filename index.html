@@ -644,7 +644,9 @@ html, body {
       <!-- 6-month trend -->
       <div class="health-chart-card">
         <div class="health-chart-title">แนวโน้มรายรับ vs รายจ่าย — 6 เดือน</div>
-        <canvas id="h-trend-chart" height="160"></canvas>
+        <div style="position:relative;height:180px">
+          <canvas id="h-trend-chart"></canvas>
+        </div>
       </div>
     </div>
 
@@ -1304,7 +1306,7 @@ function renderIncomes() {
 }
 
 // ===== Financial Health =====
-let hCatChart = null, hTrendChart = null;
+let hCatChart = null, hTrendChart = null, hRenderSeq = 0;
 
 function renderHealth() {
   const m = healthMonth.getMonth(), y = healthMonth.getFullYear();
@@ -1381,12 +1383,13 @@ function renderHealth() {
   })();
   const emEl = document.getElementById('h-emfund');
   if (emFund>0 && avg3Exp>0) {
-    const mos = (emFund/avg3Exp).toFixed(1);
-    emEl.textContent = mos+' เดือน';
-    emEl.style.color = mos>=6?'var(--green)':mos>=3?'var(--orange)':'var(--red)';
+    const mosNum = emFund/avg3Exp;
+    emEl.textContent = mosNum.toFixed(1)+' เดือน';
+    emEl.style.color = mosNum>=6?'var(--green)':mosNum>=3?'var(--orange)':'var(--red)';
   } else { emEl.textContent='—'; emEl.style.color='var(--text-3)'; }
 
   // ── B: Expense Donut by Category ─────────────────────────
+  const _seq = ++hRenderSeq;   // cancel stale timeouts
   const catWrap = document.getElementById('h-cat-wrap');
   const monthExpenses = expenses.filter(inMonth);
   if (monthExpenses.length===0) {
@@ -1423,13 +1426,14 @@ function renderHealth() {
       </div>`).join('');
 
     setTimeout(()=>{
+      if (_seq !== hRenderSeq) return;   // stale — newer render already ran
       const canvas = document.getElementById('h-cat-canvas');
       if (!canvas) return;
-      if (hCatChart) hCatChart.destroy();
+      if (hCatChart) { hCatChart.destroy(); hCatChart=null; }
       hCatChart = new Chart(canvas,{
         type:'doughnut',
         data:{ datasets:[{ data:vals, backgroundColor:colors, borderWidth:2, borderColor:'#fff', hoverOffset:4 }] },
-        options:{ cutout:'65%', plugins:{legend:{display:false},tooltip:{enabled:false}}, animation:{duration:500} }
+        options:{ responsive:false, cutout:'65%', plugins:{legend:{display:false},tooltip:{enabled:false}}, animation:{duration:400} }
       });
     },80);
   }
@@ -1445,9 +1449,10 @@ function renderHealth() {
     trendExp.push(expenses.filter(inM).reduce((s,x)=>s+Number(x.amount||0),0));
   }
   setTimeout(()=>{
+    if (_seq !== hRenderSeq) return;
     const canvas = document.getElementById('h-trend-chart');
     if (!canvas) return;
-    if (hTrendChart) hTrendChart.destroy();
+    if (hTrendChart) { hTrendChart.destroy(); hTrendChart=null; }
     hTrendChart = new Chart(canvas,{
       type:'bar',
       data:{
