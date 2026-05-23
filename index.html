@@ -1886,20 +1886,29 @@ window._deletePayment = async (debtId, paymentId, balanceBefore) => {
 
 // ===== Savings =====
 function renderSavings() {
-  // Summary header
+  // Total current value = ALL portfolios (savings + investment)
   const totalInvested = savings.reduce((s,e)=>s+Number(e.amount||0),0);
-  const withVal = savings.filter(e=>e.currentValue>0);
-  const totalCur = withVal.length
-    ? withVal.reduce((s,e)=>s+Number(e.currentValue),0)
+  const withValAll = savings.filter(e=>e.currentValue>0);
+  const totalCur = withValAll.length
+    ? withValAll.reduce((s,e)=>s+Number(e.currentValue),0)
       + savings.filter(e=>!e.currentValue).reduce((s,e)=>s+Number(e.amount||0),0)
     : totalInvested;
-  const totalRet = totalCur - totalInvested;
-  const totalRetPct = totalInvested > 0 ? totalRet/totalInvested*100 : 0;
+
+  // Gain/loss = ONLY investment portfolios (fund, stock, crypto)
+  const investOnly   = savings.filter(s=>s.type!=='savings'&&s.type!=='other');
+  const investAmt    = investOnly.reduce((s,e)=>s+Number(e.amount||0),0);
+  const investWithVal = investOnly.filter(e=>e.currentValue>0);
+  const investCur    = investWithVal.length
+    ? investWithVal.reduce((s,e)=>s+Number(e.currentValue),0)
+      + investOnly.filter(e=>!e.currentValue).reduce((s,e)=>s+Number(e.amount||0),0)
+    : investAmt;
+  const totalRet    = investCur - investAmt;
+  const totalRetPct = investAmt > 0 ? totalRet/investAmt*100 : 0;
 
   document.getElementById('sv-total').textContent = fmt(totalCur);
   const retEl = document.getElementById('sv-return');
-  if (withVal.length) {
-    retEl.textContent = (totalRet>=0?'+':'')+fmt(totalRet)+' ('+( totalRet>=0?'+':'')+totalRetPct.toFixed(2)+'%)';
+  if (investWithVal.length) {
+    retEl.textContent = (totalRet>=0?'+':'')+fmt(totalRet)+' ('+(totalRet>=0?'+':'')+totalRetPct.toFixed(2)+'%)';
     retEl.style.color = totalRet>=0 ? 'var(--green)' : 'var(--red)';
   } else { retEl.textContent='—'; retEl.style.color='var(--text-3)'; }
 
