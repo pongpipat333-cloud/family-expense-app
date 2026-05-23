@@ -1065,7 +1065,8 @@ const DEBT_TYPES = {
 const SV_TYPES = {
   savings: { name: 'เงินออม',  icon: '🏦' },
   fund:    { name: 'กองทุน',   icon: '📈' },
-  stock:   { name: 'หุ้น',     icon: '📊' },
+  stock:   { name: 'หุ้น/ETF', icon: '📊' },
+  crypto:  { name: 'คริปโต',  icon: '🪙' },
   other:   { name: 'อื่นๆ',    icon: '💎' },
 };
 
@@ -1142,7 +1143,7 @@ function subscribeAll() {
     debts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderDebts(); renderHealth();
   });
-  onSnapshot(query(collection(db, `users/${uid}/savings`), orderBy('date','desc')), snap => {
+  onSnapshot(collection(db, `users/${uid}/savings`), snap => {
     savings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderSavings(); renderHealth();
   });
@@ -1935,21 +1936,22 @@ function renderSavings() {
     </div>`;
   }).join('');
 
-  // draw donut charts after DOM update
-  requestAnimationFrame(() => {
+  // draw donut charts after DOM is painted
+  setTimeout(() => {
     savings.forEach((s,i) => {
       const canvas = document.getElementById('svc-'+s.id);
       if (!canvas) return;
       const val    = s.currentValue > 0 ? s.currentValue : s.amount;
-      const pct    = totalCur > 0 ? val/totalCur*100 : 100;
+      const pct    = totalCur > 0 ? Math.max(0.5, val/totalCur*100) : 100;
+      const rest   = Math.max(0, 100 - pct);
       const color  = SV_PAL[i % SV_PAL.length];
       svCharts[s.id] = new Chart(canvas, {
         type: 'doughnut',
-        data: { datasets: [{ data: [pct, 100-pct], backgroundColor: [color, '#f0f0f0'], borderWidth: 0, hoverOffset: 0 }] },
-        options: { cutout:'72%', plugins:{legend:{display:false},tooltip:{enabled:false}}, animation:{duration:600} }
+        data: { datasets: [{ data: [pct, rest], backgroundColor: [color, getComputedStyle(document.documentElement).getPropertyValue('--surface-2').trim()||'#e8e8e8'], borderWidth: 0, hoverOffset: 0 }] },
+        options: { cutout:'72%', plugins:{legend:{display:false},tooltip:{enabled:false}}, animation:{duration:500} }
       });
     });
-  });
+  }, 80);
 }
 
 let svCharts = {};
@@ -2011,6 +2013,7 @@ document.getElementById('sv-save').addEventListener('click', async () => {
       showToast('แก้ไขแล้ว');
     } else {
       data.createdAt = data.updatedAt;
+      data.date = data.updatedAt.split('T')[0];
       await addDoc(collection(db,`users/${uid}/savings`), data);
       showToast('เพิ่มพอร์ตแล้ว');
     }
