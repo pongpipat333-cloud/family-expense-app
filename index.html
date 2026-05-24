@@ -224,21 +224,10 @@ html, body {
 .record-mode-btn.income.active { color:var(--green); }
 
 /* ===== Health Panel ===== */
-.health-bal { text-align:center; padding:20px 16px; background:var(--surface); border-radius:var(--radius); margin-bottom:12px; box-shadow:var(--shadow); }
-.health-bal-label { font-size:12px; color:var(--text-2); margin-bottom:4px; }
-.health-bal-amount { font-size:30px; font-weight:700; }
-.health-bal-amount.pos { color:var(--green); }
-.health-bal-amount.neg { color:var(--red); }
-.health-row { display:flex; gap:10px; margin-bottom:10px; }
-.health-card { flex:1; background:var(--surface); border-radius:var(--radius-sm); padding:14px 12px; box-shadow:var(--shadow); }
-.health-card-label { font-size:11px; color:var(--text-2); margin-bottom:4px; font-weight:500; }
-.health-card-val { font-size:18px; font-weight:700; color:var(--text-1); }
 .health-bar-wrap { background:var(--border); border-radius:100px; height:8px; margin:10px 0 4px; overflow:hidden; }
 .health-bar-fill { height:100%; border-radius:100px; transition:width 0.4s; }
-.health-status { display:flex; align-items:center; gap:10px; padding:14px; background:var(--surface); border-radius:var(--radius-sm); box-shadow:var(--shadow); margin-bottom:10px; }
+.health-status { display:flex; align-items:center; gap:10px; padding:14px; background:var(--surface); border-radius:var(--radius-sm); box-shadow:var(--shadow); }
 .health-status-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.health-chart-card { background:var(--surface); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); }
-.health-chart-title { font-size:12px; font-weight:700; color:var(--text-2); text-transform:uppercase; letter-spacing:.4px; margin-bottom:12px; }
 .h-donut-wrap { display:flex; align-items:center; gap:14px; }
 .h-donut-canvas { flex-shrink:0; }
 .h-legend { flex:1; min-width:0; }
@@ -248,10 +237,6 @@ html, body {
 .h-legend-amt { font-size:11px; font-weight:700; color:var(--text-1); flex-shrink:0; }
 .h-legend-pct { font-size:10px; color:var(--text-3); flex-shrink:0; width:28px; text-align:right; }
 .h-no-data { text-align:center; padding:30px 0; color:var(--text-3); font-size:13px; }
-.h-stat-row { display:flex; gap:10px; margin-bottom:10px; }
-.h-stat-mini { flex:1; background:var(--surface); border-radius:var(--radius-sm); padding:10px 12px; box-shadow:var(--shadow); }
-.h-stat-mini-label { font-size:10px; color:var(--text-3); font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
-.h-stat-mini-val { font-size:16px; font-weight:800; margin-top:2px; }
 
 /* ===== Category Grid ===== */
 .cat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
@@ -351,24 +336,8 @@ html, body {
 .pay-preview-row.warn  { color:var(--orange); font-size:12px; }
 
 /* ===== Savings Portfolio ===== */
-.sv-summary { background:var(--surface); border-radius:var(--radius); padding:14px 16px; margin-bottom:12px; box-shadow:var(--shadow); display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; }
-.sv-sum-col { padding:4px 8px; }
-.sv-sum-col:first-child { padding-left:0; }
-.sv-sum-col:last-child  { padding-right:0; border-left:1px solid var(--border,#e8e8e8); }
-.sv-sum-col:nth-child(2){ border-left:1px solid var(--border,#e8e8e8); }
-.sv-sum-label { font-size:10px; color:var(--text-3); font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px; }
-.sv-sum-val   { font-size:20px; font-weight:800; color:var(--text-1); line-height:1.2; }
-.sv-sum-val2  { font-size:15px; font-weight:800; color:var(--text-1); line-height:1.3; }
-.sv-sum-sub   { font-size:11px; color:var(--text-3); margin-top:1px; }
-.sv-sum-ret   { font-size:12px; font-weight:700; margin-top:2px; }
-.sv-sum-ret2  { font-size:11px; font-weight:600; }
 .sv-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .sv-section { margin-bottom:18px; }
-.sv-section-hdr { display:flex; justify-content:space-between; align-items:center; padding:6px 2px 8px; margin-bottom:8px; border-bottom:2px solid var(--border,#e8e8e8); }
-.sv-section-title { font-size:13px; font-weight:700; color:var(--text-2); letter-spacing:.4px; text-transform:uppercase; }
-.sv-section-sub { font-size:12px; color:var(--text-3); margin-top:2px; }
-.sv-section-amt { text-align:right; }
-.sv-section-amt-val { font-size:14px; font-weight:800; color:var(--text-1); }
 .sv-section-amt-ret { font-size:11px; font-weight:600; }
 .sv-card { background:var(--surface); border-radius:var(--radius); padding:14px 12px; box-shadow:var(--shadow); text-align:center; display:flex; flex-direction:column; align-items:center; }
 .sv-card-header { width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
@@ -381,7 +350,6 @@ html, body {
 .sv-card-sub { font-size:10px; color:var(--text-3); margin-top:6px; }
 .sv-card-btns { display:flex; gap:6px; margin-top:12px; width:100%; }
 .sv-card-btns button { flex:1; padding:7px 2px; border-radius:8px; font-size:11px; font-weight:700; font-family:inherit; cursor:pointer; border:1.5px solid transparent; }
-.btn-sv-dep  { background:#ffd166; color:#5a3e00; border-color:#f0c040; }
 .btn-sv-edit { background:var(--accent-bg); color:var(--accent); border-color:var(--accent); }
 .btn-sv-del  { background:var(--red-bg); color:var(--red); border-color:var(--red); }
 /* ⋯ dropdown */
@@ -401,7 +369,7 @@ html, body {
 .sv-progress-bar { height:8px; background:#e8ecf0; border-radius:4px; overflow:hidden; }
 .sv-progress-fill { height:100%; border-radius:4px; transition:width .6s ease; }
 .sv-progress-info { display:flex; justify-content:space-between; font-size:11px; color:var(--text-3); margin-top:4px; margin-bottom:10px; }
-.sv-dep-btn { width:100%; padding:8px; background:#ffd166; color:#5a3e00; border:1.5px solid #f0c040; border-radius:8px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; }
+/* sv-dep-btn replaced by btn-pay-debt */
 
 /* ===== Savings ===== */
 .savings-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
@@ -588,69 +556,74 @@ html, body {
         <div class="month-label" id="h-month-label">—</div>
         <button class="month-btn" id="h-next-month">›</button>
       </div>
-      <div class="health-row">
-        <div class="health-card">
-          <div class="health-card-label">รายรับเดือนนี้</div>
-          <div class="health-card-val" style="color:var(--green)" id="h-income">฿0</div>
+      <!-- รายรับ / รายจ่าย -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">รายรับเดือนนี้</div>
+          <div class="stat-value green" id="h-income">฿0</div>
         </div>
-        <div class="health-card">
-          <div class="health-card-label">รายจ่ายเดือนนี้</div>
-          <div class="health-card-val" style="color:var(--red)" id="h-expense">฿0</div>
+        <div class="stat-card">
+          <div class="stat-label">รายจ่ายเดือนนี้</div>
+          <div class="stat-value red" id="h-expense">฿0</div>
         </div>
       </div>
-      <div class="health-bal">
-        <div class="health-bal-label">เงินคงเหลือ</div>
-        <div class="health-bal-amount" id="h-balance">฿0</div>
+      <!-- เงินคงเหลือ -->
+      <div class="card" style="text-align:center;margin-bottom:12px">
+        <div class="stat-label" style="margin-bottom:8px">เงินคงเหลือ</div>
+        <div class="stat-value" style="font-size:26px" id="h-balance">฿0</div>
         <div class="health-bar-wrap">
           <div class="health-bar-fill" id="h-bar" style="width:0%;background:var(--green)"></div>
         </div>
-        <div style="font-size:11px;color:var(--text-2)" id="h-bar-label">รายจ่าย 0% ของรายรับ</div>
+        <div style="font-size:11px;color:var(--text-2);margin-top:4px" id="h-bar-label">รายจ่าย 0% ของรายรับ</div>
       </div>
-      <div class="health-status" id="h-status">
+      <!-- สถานะ -->
+      <div class="health-status" id="h-status" style="margin-bottom:12px">
         <div class="health-status-dot" id="h-status-dot" style="background:var(--text-3)"></div>
         <div id="h-status-text" style="font-size:13px;color:var(--text-2)">บันทึกรายรับเพื่อดูสถานะ</div>
       </div>
-      <div class="health-row">
-        <div class="health-card">
-          <div class="health-card-label">อัตราการออมเดือนนี้</div>
-          <div class="health-card-val" id="h-save-rate">—</div>
+      <!-- อัตราออม / Net Worth -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">อัตราการออมเดือนนี้</div>
+          <div class="stat-value" id="h-save-rate">—</div>
         </div>
-        <div class="health-card">
-          <div class="health-card-label">Net Worth</div>
-          <div class="health-card-val" id="h-networth">฿0</div>
+        <div class="stat-card">
+          <div class="stat-label">Net Worth</div>
+          <div class="stat-value" id="h-networth">฿0</div>
         </div>
       </div>
-      <div class="health-row">
-        <div class="health-card">
-          <div class="health-card-label">หนี้คงเหลือรวม</div>
-          <div class="health-card-val" style="color:var(--red)" id="h-debt">฿0</div>
+      <!-- หนี้ / ออม -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">หนี้คงเหลือรวม</div>
+          <div class="stat-value red" id="h-debt">฿0</div>
         </div>
-        <div class="health-card">
-          <div class="health-card-label">ออม + ลงทุนรวม</div>
-          <div class="health-card-val" style="color:var(--green)" id="h-savings">฿0</div>
+        <div class="stat-card">
+          <div class="stat-label">ออม + ลงทุนรวม</div>
+          <div class="stat-value green" id="h-savings">฿0</div>
         </div>
       </div>
       <!-- DTI + Emergency Fund -->
-      <div class="h-stat-row">
-        <div class="h-stat-mini">
-          <div class="h-stat-mini-label">DTI (หนี้/รายได้)</div>
-          <div class="h-stat-mini-val" id="h-dti2">—</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">DTI (หนี้/รายได้)</div>
+          <div class="stat-value" id="h-dti2">—</div>
         </div>
-        <div class="h-stat-mini">
-          <div class="h-stat-mini-label">🛡 Emergency Fund</div>
-          <div class="h-stat-mini-val" id="h-emfund">—</div>
+        <div class="stat-card">
+          <div class="stat-label">🛡 Emergency Fund</div>
+          <div class="stat-value" id="h-emfund">—</div>
         </div>
       </div>
-      <!-- Expense by category donut -->
-      <div class="health-chart-card">
-        <div class="health-chart-title">รายจ่ายแยกหมวด — เดือนนี้</div>
+      <!-- รายจ่ายแยกหมวด donut -->
+      <div class="card">
+        <div class="card-title">รายจ่ายแยกหมวด — เดือนนี้</div>
         <div id="h-cat-wrap">
           <div class="h-no-data">ยังไม่มีรายจ่ายเดือนนี้</div>
         </div>
       </div>
       <!-- 6-month trend -->
-      <div class="health-chart-card">
-        <div class="health-chart-title">แนวโน้มรายรับ vs รายจ่าย — 6 เดือน</div>
+      <div class="card">
+        <div class="card-title">แนวโน้มรายรับ vs รายจ่าย — 6 เดือน</div>
         <div style="position:relative;height:180px;overflow:hidden">
           <canvas id="h-trend-chart"></canvas>
         </div>
@@ -659,11 +632,11 @@ html, body {
 
     <!-- Tab 4: งบประมาณ -->
     <div class="tab-panel" id="panel-budget">
-      <div class="card">
-        <div class="card-title">งบประมาณรายเดือน — กรอกแล้วกดบันทึก</div>
+      <div class="card-title" style="margin-bottom:14px">งบประมาณรายเดือน — กรอกแล้วกดบันทึก</div>
+      <div class="card" style="padding:0 16px">
         <div id="budget-list"></div>
-        <button class="btn btn-primary" style="margin-top:16px" id="save-budget">บันทึกงบประมาณ</button>
       </div>
+      <button class="btn btn-primary" style="margin-top:10px" id="save-budget">บันทึกงบประมาณ</button>
     </div>
 
     <!-- Tab 4: หนี้สิน -->
@@ -1340,7 +1313,8 @@ function renderHealth() {
 
   const balEl = document.getElementById('h-balance');
   balEl.textContent = (balance>=0?'+':'')+fmt(balance);
-  balEl.className   = 'health-bal-amount '+(balance>=0?'pos':'neg');
+  balEl.className   = 'stat-value '+(balance>=0?'green':'red');
+  balEl.style.fontSize = '26px';
 
   const pct = monthInc>0 ? Math.min(100, Math.round(monthExp/monthInc*100)) : 0;
   const barColor = pct<70?'var(--green)':pct<90?'var(--orange)':'var(--red)';
@@ -2174,7 +2148,7 @@ function renderSavings() {
 
   const list = document.getElementById('savings-list');
   if (!savings.length) {
-    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-2)">ยังไม่มีพอร์ต<br>กด + เพิ่มพอร์ต เพื่อเริ่มต้น</div>`;
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">💎</div><div class="empty-text">ยังไม่มีพอร์ต<br>กด + เพิ่มพอร์ต เพื่อเริ่มต้น</div></div>`;
     return;
   }
 
@@ -2215,7 +2189,7 @@ function renderSavings() {
           ? `<div class="sv-progress-bar"><div class="sv-progress-fill" style="width:${prog.toFixed(1)}%;background:${color}"></div></div>
              <div class="sv-progress-info"><span style="font-weight:700;color:${color}">${prog.toFixed(0)}%</span><span>เป้า ${fmt(goal)}</span></div>`
           : `<div style="font-size:11px;color:var(--text-3);margin-bottom:10px">ยังไม่ตั้งเป้าหมาย</div>`}
-        <button class="sv-dep-btn" onclick="window._depositSv('${s.id}')">+ เติมเงิน</button>
+        <button class="btn-pay-debt" onclick="window._depositSv('${s.id}')">+ เติมเงิน</button>
       </div>
     </div>`;
   }
@@ -2250,7 +2224,7 @@ function renderSavings() {
         </div>
         <div class="sv-card-sub">เติม ${fmt(s.amount)}${ret!==null?` · กำไร ${ret>=0?'+':''}${fmt(ret)}`:' · ยังไม่ได้อัปเดตยอดจริง'}</div>
         <div class="sv-card-btns">
-          <button class="btn-sv-dep" onclick="window._depositSv('${s.id}')">+ เติมเงิน</button>
+          <button class="btn-pay-debt" onclick="window._depositSv('${s.id}')">+ เติมเงิน</button>
         </div>
       </div>
     </div>`;
@@ -2264,9 +2238,9 @@ function renderSavings() {
     const retHtml = haRet
       ? `<div class="sv-section-amt-ret" style="color:${ret>=0?'var(--green)':'var(--red)'}">${ret>=0?'+':''}${fmt(ret)}</div>`
       : '';
-    return `<div class="sv-section-hdr">
-      <div><div class="sv-section-title">${icon} ${label}</div><div class="sv-section-sub">${arr.length} พอร์ต · เติม ${fmt(inv)}</div></div>
-      <div class="sv-section-amt"><div class="sv-section-amt-val">${fmt(cur)}</div>${retHtml}</div>
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+      <div><div class="card-title" style="margin-bottom:0">${icon} ${label}</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">${arr.length} พอร์ต · เติม ${fmt(inv)}</div></div>
+      <div style="text-align:right"><div style="font-size:15px;font-weight:700;color:var(--text-1)">${fmt(cur)}</div>${retHtml}</div>
     </div>`;
   }
 
