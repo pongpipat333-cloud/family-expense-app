@@ -309,6 +309,13 @@ html, body {
 .debt-payoff .po-val { font-weight:600; color:var(--text-1); }
 .debt-payoff .po-warn { font-weight:600; color:var(--red); }
 .debt-payoff .po-pn  { color:var(--text-3); }
+.cc-charges-box { background:var(--orange-bg); border-radius:8px; padding:10px 12px; margin:8px 0; }
+.cc-charges-row { display:flex; justify-content:space-between; align-items:center; font-size:13px; }
+.cc-charges-lbl { color:var(--text-2); font-size:12px; }
+.cc-charges-amt { font-size:17px; font-weight:800; color:var(--orange); }
+.cc-hint { font-size:11px; color:var(--text-2); margin-top:6px; line-height:1.5; }
+.btn-cc-sync { margin-top:6px; width:100%; padding:6px; border-radius:7px; border:1.5px solid var(--orange); background:var(--orange-bg); color:#a0520a; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; }
+.btn-pay-debt { width:100%; margin-top:8px; padding:9px; border-radius:8px; border:1.5px solid var(--accent); background:var(--accent-bg); color:var(--accent); font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; }
 
 .btn-view-history {
   width:100%; margin-top:6px; padding:6px 12px;
@@ -1802,6 +1809,13 @@ function formatPayoff(remaining, monthly, interestPct) {
 }
 
 function renderDebts() {
+  // ── คำนวณยอดรูดบัตรเครดิตเดือนนี้ จากรายจ่ายที่ใช้ช่องทาง 'credit' ──
+  const now2 = new Date();
+  const curYM = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}`;
+  const creditThisMonth = expenses
+    .filter(e => e.paymentMethod === 'credit' && (e.date||'').startsWith(curYM))
+    .reduce((s,e) => s+Number(e.amount||0), 0);
+
   const total   = debts.reduce((s,d)=>s+Number(d.remaining||0),0);
   const monthly = debts.reduce((s,d)=>s+Number(d.monthly||0),0);
   const totalInterest = debts.reduce((s,d)=>{
@@ -1861,12 +1875,30 @@ function renderDebts() {
         <span class="po-label">📅 คาดว่าหมดหนี้:</span>
         ${formatPayoff(d.remaining, d.monthly, d.interest)}
       </div>
+      ${d.type === 'credit' ? `
+      <div class="cc-charges-box">
+        <div class="cc-charges-row">
+          <span class="cc-charges-lbl">💳 รูดบัตรเดือนนี้</span>
+          <span class="cc-charges-amt">${fmt(creditThisMonth)}</span>
+        </div>
+        <div class="cc-hint">✅ บันทึกรายจ่ายตอน<b>รูด</b> → กด "<b>จ่ายหนี้</b>" ตอนจ่ายบิล (ไม่ต้องบันทึกรายจ่ายซ้ำ)</div>
+        ${creditThisMonth > 0 && Math.abs(creditThisMonth - d.remaining) > 1 ? `
+        <button class="btn-cc-sync" onclick="event.stopPropagation();window._syncCC('${d.id}',${creditThisMonth})">
+          🔄 อัปเดตยอดหนี้ → ${fmt(creditThisMonth)}
+        </button>` : ''}
+      </div>` : ''}
       <button class="btn-pay-debt" onclick="event.stopPropagation();window._payDebt('${d.id}')">💳 บันทึกจ่ายงวดนี้</button>
       <button class="btn-view-history" onclick="event.stopPropagation();window._toggleHistory('${d.id}',this)">📋 ประวัติการจ่าย ▾</button>
       <div class="pay-history-wrap" id="pay-history-${d.id}" style="display:none"></div>
     </div>`;
   }).join('');
 }
+
+window._syncCC = async (id, amount) => {
+  if (!confirm(`อัปเดตยอดหนี้บัตรเครดิตเป็น ${fmt(amount)} ใช่ไหม?\n(ตรงกับยอดรูดบัตรเดือนนี้)`)) return;
+  await updateDoc(doc(db, 'users', uid, 'debts', id), { remaining: amount });
+  showToast('อัปเดตยอดหนี้แล้ว');
+};
 
 window._editDebt = id => {
   const d = debts.find(x=>x.id===id); if(!d) return;
