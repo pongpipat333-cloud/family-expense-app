@@ -695,24 +695,34 @@ html, body {
 
     <!-- Tab 5: ออม/ลงทุน -->
     <div class="tab-panel" id="panel-savings">
-      <!-- Summary header -->
-      <div class="sv-summary">
-        <!-- Col 1: มูลค่ารวม -->
-        <div class="sv-sum-col">
-          <div class="sv-sum-label">มูลค่ารวม</div>
-          <div class="sv-sum-val" id="sv-total">฿0</div>
+      <!-- Row 1: มูลค่ารวม + กำไร/ขาดทุน -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">มูลค่ารวม</div>
+          <div class="stat-value green" id="sv-total">฿0</div>
         </div>
-        <!-- Col 2: เงินออม -->
-        <div class="sv-sum-col">
-          <div class="sv-sum-label">🏦 เงินออม</div>
-          <div class="sv-sum-val2" id="sv-save-total">—</div>
+        <div class="stat-card">
+          <div class="stat-label">กำไร / ขาดทุน</div>
+          <div class="stat-value" id="sv-return">—</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px" id="sv-return-sub">จากการลงทุน</div>
         </div>
-        <!-- Col 3: การลงทุน -->
-        <div class="sv-sum-col">
-          <div class="sv-sum-label">📈 การลงทุน</div>
-          <div class="sv-sum-val2" id="sv-inv-total">—</div>
-          <div class="sv-sum-sub">ต้นทุน <span id="sv-inv-cost">—</span></div>
-          <div class="sv-sum-ret" id="sv-return">—</div>
+      </div>
+      <!-- Row 2: เงินออม + ต้นทุน + มูลค่าลงทุน -->
+      <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="stat-card">
+          <div class="stat-label">🏦 เงินออม</div>
+          <div class="stat-value" id="sv-save-total">—</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px">ยอดรวม</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">📈 ต้นทุน</div>
+          <div class="stat-value" id="sv-inv-cost">—</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px">เงินที่ลงไป</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">💹 มูลค่าลงทุน</div>
+          <div class="stat-value" id="sv-inv-total">—</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px">ราคาตลาด</div>
         </div>
       </div>
       <!-- Portfolio sections -->
@@ -2135,22 +2145,32 @@ function renderSavings() {
   const totalRet    = investCur - investAmt;
   const totalRetPct = investAmt > 0 ? totalRet/investAmt*100 : 0;
 
-  // Col 1: มูลค่ารวม
+  // Row 1: มูลค่ารวม
   document.getElementById('sv-total').textContent = fmt(totalCur);
 
-  // Col 2: เงินออม — sum of savings/other type
+  // Row 1: กำไร/ขาดทุน
+  const retEl    = document.getElementById('sv-return');
+  const retSubEl = document.getElementById('sv-return-sub');
+  if (investWithVal.length) {
+    retEl.textContent    = (totalRet>=0?'+':'')+fmt(totalRet);
+    retEl.style.color    = totalRet>=0 ? 'var(--green)' : 'var(--red)';
+    retSubEl.textContent = (totalRet>=0?'+':'')+totalRetPct.toFixed(2)+'% จากลงทุน';
+    retSubEl.style.color = totalRet>=0 ? 'var(--green)' : 'var(--red)';
+  } else {
+    retEl.textContent    = '—';
+    retEl.style.color    = 'var(--text-3)';
+    retSubEl.textContent = 'จากการลงทุน';
+    retSubEl.style.color = 'var(--text-3)';
+  }
+
+  // Row 2: เงินออม
   const savingsOnly = savings.filter(s=>s.type==='savings'||s.type==='other');
   const savingsCur  = savingsOnly.reduce((s,e)=>s+(e.currentValue>0?Number(e.currentValue):Number(e.amount||0)),0);
   document.getElementById('sv-save-total').textContent = savingsCur > 0 ? fmt(savingsCur) : '—';
 
-  // Col 3: การลงทุน
-  document.getElementById('sv-inv-total').textContent = investAmt > 0 ? fmt(investCur) : '—';
+  // Row 2: ต้นทุน + มูลค่าลงทุน
   document.getElementById('sv-inv-cost').textContent  = investAmt > 0 ? fmt(investAmt) : '—';
-  const retEl = document.getElementById('sv-return');
-  if (investWithVal.length) {
-    retEl.textContent = (totalRet>=0?'+':'')+fmt(totalRet)+' ('+(totalRet>=0?'+':'')+totalRetPct.toFixed(2)+'%)';
-    retEl.style.color = totalRet>=0 ? 'var(--green)' : 'var(--red)';
-  } else { retEl.textContent='—'; retEl.style.color='var(--text-3)'; }
+  document.getElementById('sv-inv-total').textContent = investAmt > 0 ? fmt(investCur) : '—';
 
   const list = document.getElementById('savings-list');
   if (!savings.length) {
