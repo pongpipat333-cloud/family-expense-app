@@ -1831,7 +1831,9 @@ function renderDebts() {
     document.getElementById('debt-list').innerHTML = `<div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">ยังไม่มีรายการหนี้</div></div>`;
     return;
   }
-  document.getElementById('debt-list').innerHTML = debts.map(d => {
+
+  // ── helper: render one debt card ──────────────────────────
+  const makeDebtCard = d => {
     const dt  = DEBT_TYPES[d.type]||{name:d.type,icon:'💳'};
     const pct = d.originalAmount ? Math.round((1-d.remaining/d.originalAmount)*100) : 0;
     const hasOriginal = d.originalAmount && d.originalAmount > d.remaining;
@@ -1875,7 +1877,43 @@ function renderDebts() {
       <button class="btn-view-history" onclick="event.stopPropagation();window._toggleHistory('${d.id}',this)">📋 ประวัติการจ่าย ▾</button>
       <div class="pay-history-wrap" id="pay-history-${d.id}" style="display:none"></div>
     </div>`;
-  }).join('');
+  };
+
+  // ── helper: render section header ─────────────────────────
+  const makeDebtSectionHdr = (icon, label, gDebts) => {
+    const gTotal   = gDebts.reduce((s,d) => s+Number(d.remaining||0), 0);
+    const gMonthly = gDebts.reduce((s,d) => s+Number(d.monthly||0), 0);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+      <div>
+        <div class="card-title" style="margin-bottom:0">${icon} ${label}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px">${gDebts.length} รายการ · งวด ${fmt(gMonthly)}/เดือน</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:15px;font-weight:700;color:var(--red)">${fmt(gTotal)}</div>
+        <div style="font-size:10px;color:var(--text-3)">คงเหลือรวม</div>
+      </div>
+    </div>`;
+  };
+
+  // ── group debts and render ─────────────────────────────────
+  const DEBT_GROUP_DEFS = [
+    { icon: '🏠', label: 'บ้าน & รถ',              types: ['house', 'car'] },
+    { icon: '💳', label: 'สินเชื่อ & บัตรเครดิต', types: ['personal', 'credit'] },
+  ];
+  const groupedIds = new Set();
+  let html = '';
+  DEBT_GROUP_DEFS.forEach(g => {
+    const gDebts = debts.filter(d => g.types.includes(d.type));
+    if (!gDebts.length) return;
+    gDebts.forEach(d => groupedIds.add(d.id));
+    html += `<div class="sv-section">${makeDebtSectionHdr(g.icon, g.label, gDebts)}${gDebts.map(makeDebtCard).join('')}</div>`;
+  });
+  // ungrouped fallback (custom debt types)
+  const ungrouped = debts.filter(d => !groupedIds.has(d.id));
+  if (ungrouped.length) {
+    html += `<div class="sv-section">${makeDebtSectionHdr('💰', 'อื่นๆ', ungrouped)}${ungrouped.map(makeDebtCard).join('')}</div>`;
+  }
+  document.getElementById('debt-list').innerHTML = html;
 }
 
 window._syncCC = async (id, amount) => {
