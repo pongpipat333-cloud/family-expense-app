@@ -658,12 +658,12 @@ html, body {
         <div class="stat-card">
           <div class="stat-label">ดอกเบี้ย/เดือน</div>
           <div class="stat-value" style="color:var(--red)" id="d-interest-stat">฿0</div>
-          <div style="font-size:10px;color:var(--text-3);margin-top:2px">เสียเปล่า</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px" id="d-interest-pct">เสียเปล่า</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">ต้นลดจริง/เดือน</div>
           <div class="stat-value green" id="d-principal-stat">฿0</div>
-          <div style="font-size:10px;color:var(--text-3);margin-top:2px">ลดหนี้จริง</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px" id="d-principal-pct">ลดหนี้จริง</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">หนี้/รายได้ (DTI)</div>
@@ -694,7 +694,7 @@ html, body {
         <div class="stat-card">
           <div class="stat-label">🏦 เงินออม</div>
           <div class="stat-value" id="sv-save-total">—</div>
-          <div style="font-size:10px;color:var(--text-3);margin-top:2px">ยอดรวม</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px" id="sv-save-pct">ยอดรวม</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">📈 ต้นทุน</div>
@@ -704,7 +704,7 @@ html, body {
         <div class="stat-card">
           <div class="stat-label">💹 มูลค่าลงทุน</div>
           <div class="stat-value" id="sv-inv-total">—</div>
-          <div style="font-size:10px;color:var(--text-3);margin-top:2px">ราคาตลาด</div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px" id="sv-inv-pct">ราคาตลาด</div>
         </div>
       </div>
       <!-- Portfolio sections -->
@@ -1948,6 +1948,12 @@ function renderDebts() {
   document.getElementById('d-monthly-stat').textContent = fmt(monthly);
   document.getElementById('d-interest-stat').textContent = fmt(totalInterest);
   document.getElementById('d-principal-stat').textContent = fmt(totalPrincipal);
+  if (monthly > 0) {
+    const iPct = (totalInterest / monthly * 100).toFixed(1);
+    const pPct = (totalPrincipal / monthly * 100).toFixed(1);
+    document.getElementById('d-interest-pct').textContent  = iPct + '% ของค่างวด';
+    document.getElementById('d-principal-pct').textContent = pPct + '% ของค่างวด';
+  }
 
   const dtiEl = document.getElementById('d-dti');
   const dtiLbl = document.getElementById('d-dti-label');
@@ -2295,10 +2301,14 @@ function renderSavings() {
   const savingsOnly = savings.filter(s=>s.type==='savings'||s.type==='other');
   const savingsCur  = savingsOnly.reduce((s,e)=>s+(e.currentValue>0?Number(e.currentValue):Number(e.amount||0)),0);
   document.getElementById('sv-save-total').textContent = savingsCur > 0 ? fmt(savingsCur) : '—';
+  document.getElementById('sv-save-pct').textContent   = totalCur > 0 && savingsCur > 0
+    ? (savingsCur / totalCur * 100).toFixed(1) + '% ของยอดรวม' : 'ยอดรวม';
 
   // Row 2: ต้นทุน + มูลค่าลงทุน
   document.getElementById('sv-inv-cost').textContent  = investAmt > 0 ? fmt(investAmt) : '—';
   document.getElementById('sv-inv-total').textContent = investAmt > 0 ? fmt(investCur) : '—';
+  document.getElementById('sv-inv-pct').textContent   = totalCur > 0 && investCur > 0
+    ? (investCur / totalCur * 100).toFixed(1) + '% ของยอดรวม' : 'ราคาตลาด';
 
   const list = document.getElementById('savings-list');
   if (!savings.length) {
