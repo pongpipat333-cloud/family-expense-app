@@ -294,12 +294,6 @@ html, body {
 .debt-payoff .po-val { font-weight:600; color:var(--text-1); }
 .debt-payoff .po-warn { font-weight:600; color:var(--red); }
 .debt-payoff .po-pn  { color:var(--text-3); }
-.cc-charges-box { background:var(--orange-bg); border-radius:8px; padding:10px 12px; margin:8px 0; }
-.cc-charges-row { display:flex; justify-content:space-between; align-items:center; font-size:13px; }
-.cc-charges-lbl { color:var(--text-2); font-size:12px; }
-.cc-charges-amt { font-size:17px; font-weight:800; color:var(--orange); }
-.cc-hint { font-size:11px; color:var(--text-2); margin-top:6px; line-height:1.5; }
-.btn-cc-sync { margin-top:6px; width:100%; padding:6px; border-radius:7px; border:1.5px solid var(--orange); background:var(--orange-bg); color:#a0520a; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; }
 .btn-pay-debt { width:100%; margin-top:8px; padding:9px; border-radius:8px; border:1.5px solid var(--accent); background:var(--accent-bg); color:var(--accent); font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; }
 
 .btn-view-history {
@@ -760,18 +754,19 @@ html, body {
           </div>
 
           <div class="example-card">
-            <div class="example-title">บิลบัตรเครดิต — วิธีบันทึก</div>
-            <div class="example-row"><span class="example-key">วิธี</span><span class="example-val">บันทึกแต่ละรายการในบิลแยกกัน</span></div>
-            <div class="example-row"><span class="example-key">ช่องทาง</span><span class="example-val">บัตรเครดิต (ทุกรายการ)</span></div>
-            <div class="example-note">ไม่ต้องบันทึกตอนโอนจ่ายบิล — จะนับซ้ำ บันทึกเฉพาะรายการที่ซื้อจริงจากบิล</div>
+            <div class="example-title">ซื้อของด้วยบัตรเครดิต — วิธีบันทึก</div>
+            <div class="example-row"><span class="example-key">ตอนซื้อ</span><span class="example-val">บันทึกรายจ่ายทันที เหมือนจ่ายเงินสด</span></div>
+            <div class="example-row"><span class="example-key">ช่องทาง</span><span class="example-val">บัตรเครดิต</span></div>
+            <div class="example-row"><span class="example-key">ตอนบิลมา</span><span class="example-val">โอนจ่ายธนาคารเลย ไม่ต้องบันทึกซ้ำ</span></div>
+            <div class="example-note">💡 เลือกช่องทาง "บัตรเครดิต" เพื่อให้กรองดูได้ว่าเดือนนี้รูดไปเท่าไหร่</div>
           </div>
 
           <div class="example-card">
             <div class="example-title">ผ่อน iPad 10 เดือน 0% — วิธีบันทึก</div>
-            <div class="example-row"><span class="example-key">ขั้นที่ 1</span><span class="example-val">บันทึกใน แท็บ "หนี้สิน" ครั้งเดียว</span></div>
-            <div class="example-row"><span class="example-key">ยอดรวม</span><span class="example-val">30,000 บาท</span></div>
-            <div class="example-row"><span class="example-key">งวด/เดือน</span><span class="example-val">3,000 บาท / 10 งวด</span></div>
-            <div class="example-row"><span class="example-key">ขั้นที่ 2</span><span class="example-val">เมื่อบิลมา บันทึก 3,000 ใต้หมวด "บัตรเครดิต"</span></div>
+            <div class="example-row"><span class="example-key">ขั้นที่ 1</span><span class="example-val">เพิ่มใน แท็บ "หนี้สิน" ครั้งเดียว</span></div>
+            <div class="example-row"><span class="example-key">ยอดรวม</span><span class="example-val">30,000 บาท · งวดละ 3,000 / 10 งวด</span></div>
+            <div class="example-row"><span class="example-key">ขั้นที่ 2</span><span class="example-val">บิลมาทุกเดือน → กด "บันทึกจ่ายงวดนี้" ในการ์ดหนี้</span></div>
+            <div class="example-note">💡 ผ่อนหลายงวด = ใช้แท็บหนี้ติดตาม ไม่บันทึกเป็นรายจ่ายซ้ำ</div>
           </div>
         </div>
 
@@ -779,7 +774,7 @@ html, body {
           <div class="guide-title">คำถามที่พบบ่อย</div>
           <div class="faq-item">
             <div class="faq-q">บัตรเครดิตบันทึกยังไง?</div>
-            <div class="faq-a">บันทึกจากบิลรายเดือนทีละรายการ ไม่ต้องบันทึกตอนโอนจ่ายบิล (จะนับซ้ำ)</div>
+            <div class="faq-a">บันทึกทันทีตอนซื้อ เหมือนจ่ายเงินสด — เลือกช่องทาง "บัตรเครดิต" ไว้ ตอนบิลมาโอนจ่ายธนาคารได้เลย ไม่ต้องบันทึกซ้ำ</div>
           </div>
           <div class="faq-item">
             <div class="faq-q">ของกลาง ใส่ผู้จ่ายเป็นใคร?</div>
@@ -1790,13 +1785,6 @@ function formatPayoff(remaining, monthly, interestPct) {
 }
 
 function renderDebts() {
-  // ── คำนวณยอดรูดบัตรเครดิตเดือนนี้ จากรายจ่ายที่ใช้ช่องทาง 'credit' ──
-  const now2 = new Date();
-  const curYM = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}`;
-  const creditThisMonth = expenses
-    .filter(e => e.paymentMethod === 'credit' && (e.date||'').startsWith(curYM))
-    .reduce((s,e) => s+Number(e.amount||0), 0);
-
   const total   = debts.reduce((s,d)=>s+Number(d.remaining||0),0);
   const monthly = debts.reduce((s,d)=>s+Number(d.monthly||0),0);
   const totalInterest = debts.reduce((s,d)=>{
@@ -1858,18 +1846,6 @@ function renderDebts() {
         <span class="po-label">📅 คาดว่าหมดหนี้:</span>
         ${formatPayoff(d.remaining, d.monthly, d.interest)}
       </div>
-      ${d.type === 'credit' ? `
-      <div class="cc-charges-box">
-        <div class="cc-charges-row">
-          <span class="cc-charges-lbl">💳 รูดบัตรเดือนนี้</span>
-          <span class="cc-charges-amt">${fmt(creditThisMonth)}</span>
-        </div>
-        <div class="cc-hint">✅ บันทึกรายจ่ายตอน<b>รูด</b> → กด "<b>จ่ายหนี้</b>" ตอนจ่ายบิล (ไม่ต้องบันทึกรายจ่ายซ้ำ)</div>
-        ${creditThisMonth > 0 && Math.abs(creditThisMonth - d.remaining) > 1 ? `
-        <button class="btn-cc-sync" onclick="event.stopPropagation();window._syncCC('${d.id}',${creditThisMonth})">
-          🔄 อัปเดตยอดหนี้ → ${fmt(creditThisMonth)}
-        </button>` : ''}
-      </div>` : ''}
       <button class="btn-pay-debt" onclick="event.stopPropagation();window._payDebt('${d.id}')">💳 บันทึกจ่ายงวดนี้</button>
       <button class="btn-view-history" onclick="event.stopPropagation();window._toggleHistory('${d.id}',this)">📋 ประวัติการจ่าย ▾</button>
       <div class="pay-history-wrap" id="pay-history-${d.id}" style="display:none"></div>
@@ -1913,11 +1889,6 @@ function renderDebts() {
   document.getElementById('debt-list').innerHTML = html;
 }
 
-window._syncCC = async (id, amount) => {
-  if (!confirm(`อัปเดตยอดหนี้บัตรเครดิตเป็น ${fmt(amount)} ใช่ไหม?\n(ตรงกับยอดรูดบัตรเดือนนี้)`)) return;
-  await updateDoc(doc(db, 'users', uid, 'debts', id), { remaining: amount });
-  showToast('อัปเดตยอดหนี้แล้ว');
-};
 
 window._editDebt = id => {
   const d = debts.find(x=>x.id===id); if(!d) return;
