@@ -838,11 +838,11 @@ html, body {
     </div>
     <div class="form-group">
       <label class="form-label">หมวดหมู่</label>
-      <div class="cat-section-label">รายจ่ายทั่วไป</div>
       <div class="cat-grid" id="cat-grid-general">
         <button class="cat-btn active" data-value="food"><span class="cat-icon">🍜</span><span class="cat-name">อาหาร & เครื่องดื่ม</span></button>
         <button class="cat-btn" data-value="utilities"><span class="cat-icon">💡</span><span class="cat-name">สาธารณูปโภค</span></button>
         <button class="cat-btn" data-value="transport"><span class="cat-icon">🚗</span><span class="cat-name">การเดินทาง</span></button>
+        <button class="cat-btn" data-value="maintenance"><span class="cat-icon">🔧</span><span class="cat-name">ซ่อมบำรุง</span></button>
         <button class="cat-btn" data-value="health"><span class="cat-icon">💊</span><span class="cat-name">สุขภาพ & ยา</span></button>
         <button class="cat-btn" data-value="education"><span class="cat-icon">📚</span><span class="cat-name">การศึกษา</span></button>
         <button class="cat-btn" data-value="clothing"><span class="cat-icon">👕</span><span class="cat-name">เสื้อผ้า & ของใช้</span></button>
@@ -850,14 +850,8 @@ html, body {
         <button class="cat-btn" data-value="gift_social"><span class="cat-icon">🎁</span><span class="cat-name">ของขวัญ & สังคม</span></button>
         <button class="cat-btn" data-value="child"><span class="cat-icon">👶</span><span class="cat-name">ค่าใช้จ่ายลูก</span></button>
         <button class="cat-btn" data-value="parent_care"><span class="cat-icon">👴</span><span class="cat-name">ดูแลบุพการี</span></button>
+        <button class="cat-btn" data-value="tax_fee"><span class="cat-icon">🧾</span><span class="cat-name">ภาษี & ค่าราชการ</span></button>
         <button class="cat-btn" data-value="other"><span class="cat-icon">📌</span><span class="cat-name">อื่นๆ</span></button>
-      </div>
-      <div class="cat-section-label" style="margin-top:12px">ภาระหนี้</div>
-      <div class="cat-grid" id="cat-grid-debt">
-        <button class="cat-btn" data-value="debt_house"><span class="cat-icon">🏠</span><span class="cat-name">ผ่อนบ้าน</span></button>
-        <button class="cat-btn" data-value="debt_car"><span class="cat-icon">🚘</span><span class="cat-name">ผ่อนรถ</span></button>
-        <button class="cat-btn" data-value="debt_personal"><span class="cat-icon">💳</span><span class="cat-name">สินเชื่อส่วนบุคคล</span></button>
-        <button class="cat-btn" data-value="debt_credit"><span class="cat-icon">💴</span><span class="cat-name">บัตรเครดิต</span></button>
       </div>
     </div>
     <div class="form-group">
@@ -1111,24 +1105,27 @@ let pieChart = null, barChart = null;
 
 // ===== Data =====
 const CATS = {
-  food:          { name: 'อาหาร & เครื่องดื่ม', icon: '🍜', color: '#F44336' },  // red
-  utilities:     { name: 'สาธารณูปโภค',          icon: '💡', color: '#FFEB3B' },  // yellow
-  transport:     { name: 'การเดินทาง',            icon: '🚗', color: '#2196F3' },  // blue
-  health:        { name: 'สุขภาพ & ยา',           icon: '💊', color: '#4CAF50' },  // green
-  education:     { name: 'การศึกษา',              icon: '📚', color: '#9C27B0' },  // purple
-  clothing:      { name: 'เสื้อผ้า & ของใช้',     icon: '👕', color: '#E91E63' },  // pink
-  entertainment: { name: 'ความบันเทิง',           icon: '🎬', color: '#FF5722' },  // deep orange
-  gift_social:   { name: 'ของขวัญ & สังคม',       icon: '🎁', color: '#00BCD4' },  // cyan
-  child:         { name: 'ค่าใช้จ่ายลูก',         icon: '👶', color: '#8BC34A' },  // light green
-  parent_care:   { name: 'ดูแลบุพการี',           icon: '👴', color: '#795548' },  // brown
-  other:         { name: 'อื่นๆ',                 icon: '📌', color: '#9E9E9E' },  // grey
-  debt_house:    { name: 'ผ่อนบ้าน',              icon: '🏠', color: '#3F51B5' },  // indigo
-  debt_car:      { name: 'ผ่อนรถ',               icon: '🚘', color: '#26A69A' },  // teal
-  debt_personal: { name: 'สินเชื่อส่วนบุคคล',    icon: '💳', color: '#E17055' },  // salmon
-  debt_credit:   { name: 'บัตรเครดิต',            icon: '💴', color: '#FFC107' },  // amber
+  food:          { name: 'อาหาร & เครื่องดื่ม',   icon: '🍜', color: '#F44336' },  // red
+  utilities:     { name: 'สาธารณูปโภค',            icon: '💡', color: '#FFEB3B' },  // yellow
+  transport:     { name: 'การเดินทาง',              icon: '🚗', color: '#2196F3' },  // blue
+  maintenance:   { name: 'ซ่อมบำรุง',              icon: '🔧', color: '#607D8B' },  // blue-grey (NEW)
+  health:        { name: 'สุขภาพ & ยา',             icon: '💊', color: '#4CAF50' },  // green
+  education:     { name: 'การศึกษา',                icon: '📚', color: '#9C27B0' },  // purple
+  clothing:      { name: 'เสื้อผ้า & ของใช้',       icon: '👕', color: '#E91E63' },  // pink
+  entertainment: { name: 'ความบันเทิง',             icon: '🎬', color: '#FF5722' },  // deep orange
+  gift_social:   { name: 'ของขวัญ & สังคม',         icon: '🎁', color: '#00BCD4' },  // cyan
+  child:         { name: 'ค่าใช้จ่ายลูก',           icon: '👶', color: '#8BC34A' },  // light green
+  parent_care:   { name: 'ดูแลบุพการี',             icon: '👴', color: '#795548' },  // brown
+  tax_fee:       { name: 'ภาษี & ค่าราชการ',        icon: '🧾', color: '#FFA000' },  // amber (NEW)
+  other:         { name: 'อื่นๆ',                   icon: '📌', color: '#9E9E9E' },  // grey
+  // ── legacy: kept for displaying old records only (not in form) ──
+  debt_house:    { name: 'ผ่อนบ้าน',                icon: '🏠', color: '#3F51B5' },
+  debt_car:      { name: 'ผ่อนรถ',                  icon: '🚘', color: '#26A69A' },
+  debt_personal: { name: 'สินเชื่อส่วนบุคคล',      icon: '💳', color: '#E17055' },
+  debt_credit:   { name: 'บัตรเครดิต',              icon: '💴', color: '#FFC107' },
 };
 
-const BUDGET_KEYS = ['food','utilities','transport','health','education','clothing','entertainment','gift_social','child','parent_care','other'];
+const BUDGET_KEYS = ['food','utilities','transport','maintenance','health','education','clothing','entertainment','gift_social','child','parent_care','tax_fee','other'];
 
 const DEBT_TYPES = {
   house:    { name: 'บ้าน / คอนโด',             icon: '🏠' },
