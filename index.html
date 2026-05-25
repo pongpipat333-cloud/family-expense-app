@@ -849,7 +849,7 @@ html, body {
         <button class="cat-btn active" data-value="food"><span class="cat-icon">🍜</span><span class="cat-name">อาหาร & เครื่องดื่ม</span></button>
         <button class="cat-btn" data-value="utilities"><span class="cat-icon">💡</span><span class="cat-name">สาธารณูปโภค</span></button>
         <button class="cat-btn" data-value="transport"><span class="cat-icon">🚗</span><span class="cat-name">การเดินทาง</span></button>
-        <button class="cat-btn" data-value="maintenance"><span class="cat-icon">🔧</span><span class="cat-name">ซ่อมบำรุง</span></button>
+        <button class="cat-btn" data-value="maintenance"><span class="cat-icon">🔧</span><span class="cat-name">ของใช้ในบ้าน & ซ่อมบำรุง</span></button>
         <button class="cat-btn" data-value="health"><span class="cat-icon">💊</span><span class="cat-name">สุขภาพ & ยา</span></button>
         <button class="cat-btn" data-value="insurance"><span class="cat-icon">🛡️</span><span class="cat-name">ประกัน</span></button>
         <button class="cat-btn" data-value="education"><span class="cat-icon">📚</span><span class="cat-name">การศึกษา</span></button>
@@ -1121,7 +1121,7 @@ const CATS = {
   food:          { name: 'อาหาร & เครื่องดื่ม',   icon: '🍜', color: '#F44336' },  // red
   utilities:     { name: 'สาธารณูปโภค',            icon: '💡', color: '#FFEB3B' },  // yellow
   transport:     { name: 'การเดินทาง',              icon: '🚗', color: '#2196F3' },  // blue
-  maintenance:   { name: 'ซ่อมบำรุง',              icon: '🔧', color: '#607D8B' },  // blue-grey (NEW)
+  maintenance:   { name: 'ของใช้ในบ้าน & ซ่อมบำรุง', icon: '🔧', color: '#607D8B' },
   health:        { name: 'สุขภาพ & ยา',             icon: '💊', color: '#4CAF50' },  // green
   education:     { name: 'การศึกษา',                icon: '📚', color: '#9C27B0' },  // purple
   clothing:      { name: 'เสื้อผ้า & ของใช้',       icon: '👕', color: '#E91E63' },  // pink
@@ -1147,7 +1147,7 @@ const SUBCATS = {
   transport:    [ {v:'fuel',      n:'น้ำมันรถ'}, {v:'transit', n:'ค่าโดยสาร (แท็กซี่ / Grab)'}, {v:'parking', n:'ที่จอดรถ / ทางด่วน'} ],
   health:       [ {v:'doctor',    n:'ค่าหมอ / โรงพยาบาล'}, {v:'medicine', n:'ยาและอุปกรณ์'}, {v:'fitness', n:'ฟิตเนส / กีฬา'} ],
   insurance:    [ {v:'life',      n:'ประกันชีวิต'}, {v:'health_ins', n:'ประกันสุขภาพ'}, {v:'car_ins', n:'ประกันรถ'}, {v:'home_ins', n:'ประกันบ้าน'} ],
-  maintenance:  [ {v:'home_fix',  n:'ซ่อมบ้าน / ของใช้ในบ้าน'}, {v:'car_fix', n:'ซ่อมรถ'}, {v:'cleaning', n:'ค่าทำความสะอาด'} ],
+  maintenance:  [ {v:'home_item', n:'ของใช้ภายในบ้าน'}, {v:'home_fix', n:'ซ่อมบำรุงบ้าน'}, {v:'car_fix', n:'ซ่อมรถ'}, {v:'cleaning', n:'ค่าทำความสะอาดบ้าน'} ],
   clothing:     [ {v:'clothes',   n:'เสื้อผ้า / รองเท้า'}, {v:'personal', n:'ของใช้ส่วนตัว'}, {v:'cosmetics', n:'เครื่องสำอาง'} ],
   entertainment:[ {v:'streaming', n:'Streaming (Netflix / YouTube)'}, {v:'gaming', n:'เกม / App'}, {v:'travel', n:'ท่องเที่ยว / ทริป'}, {v:'activity', n:'กิจกรรมบันเทิงอื่น'} ],
   gift_social:  [ {v:'gift',      n:'ของขวัญ / เงินซอง'}, {v:'party', n:'งานเลี้ยง / สังสรรค์'}, {v:'donation', n:'บริจาค / ทำบุญ'} ],
