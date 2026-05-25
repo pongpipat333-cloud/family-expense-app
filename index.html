@@ -2351,7 +2351,7 @@ function renderSavings() {
   // Investment card: donut chart style
   function makeInvestCard(s) {
     const val    = sectionVal(s);
-    const pct    = totalCur > 0 ? (val/totalCur*100).toFixed(1) : '0.0';
+    const pct    = investCur > 0 ? (val/investCur*100).toFixed(1) : '0.0';
     const ret    = s.currentValue > 0 ? s.currentValue - s.amount : null;
     const retPct = (ret!==null && s.amount>0) ? ret/s.amount*100 : 0;
     const t      = SV_TYPES[s.type]||{name:s.type,icon:'💰'};
@@ -2419,7 +2419,9 @@ function renderSavings() {
       const canvas = document.getElementById('svc-'+s.id);
       if (!canvas) return;
       const val    = sectionVal(s);
-      const pct    = totalCur > 0 ? Math.max(0.5, val/totalCur*100) : 100;
+      const isInvest = s.type !== 'savings' && s.type !== 'other';
+      const base   = isInvest ? investCur : totalCur;
+      const pct    = base > 0 ? Math.max(0.5, val/base*100) : 100;
       const rest   = Math.max(0, 100 - pct);
       const color  = SV_PAL[i % SV_PAL.length];
       svCharts[s.id] = new Chart(canvas, {
