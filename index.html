@@ -887,6 +887,7 @@ html, body {
         <button class="pill active" data-value="cash">เงินสด</button>
         <button class="pill" data-value="credit">บัตรเครดิต</button>
         <button class="pill" data-value="transfer">โอนเงิน</button>
+        <button class="pill" data-value="spaylater">SPayLater</button>
       </div>
     </div>
     <div class="form-group">
@@ -1522,7 +1523,7 @@ function renderExpenses() {
     groups[date].forEach(e => {
       const cat = CATS[e.category] || { name: e.category, icon: '📌', color: '#ccc' };
       const isDebt = e.category?.startsWith('debt_');
-      const pmLabel = e.paymentMethod === 'cash' ? 'เงินสด' : e.paymentMethod === 'credit' ? 'บัตรเครดิต' : 'โอน';
+      const pmLabel = e.paymentMethod === 'cash' ? 'เงินสด' : e.paymentMethod === 'credit' ? 'บัตรเครดิต' : e.paymentMethod === 'spaylater' ? 'SPayLater' : 'โอน';
       html += `<div class="tx-item" onclick="window._editExp('${e.id}')">
         <div class="tx-icon" style="background:${cat.color}22">${cat.icon}</div>
         <div class="tx-info">
