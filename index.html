@@ -435,6 +435,18 @@ html, body {
 
 .divider { height: 1px; background: var(--border); margin: 8px 0; }
 
+/* ===== Sub-category chips ===== */
+.subcat-section { margin-top:8px; padding:10px 12px; background:var(--bg); border-radius:var(--radius-sm); }
+.subcat-section-label { font-size:11px; font-weight:600; color:var(--text-3); margin-bottom:6px; letter-spacing:0.3px; }
+.subcat-chips { display:flex; gap:6px; flex-wrap:wrap; }
+.subcat-chip {
+  padding:6px 13px; border-radius:100px;
+  border:1.5px solid var(--border); background:var(--surface);
+  font-size:13px; cursor:pointer; white-space:nowrap;
+  color:var(--text-2); font-family:inherit; transition:all 0.15s;
+}
+.subcat-chip.active { background:var(--accent-bg); border-color:var(--accent); color:var(--accent); font-weight:500; }
+
 @media (min-width: 640px) {
   .tab-panel { padding: 24px; }
   .stat-grid { grid-template-columns: repeat(3, 1fr); }
@@ -849,6 +861,10 @@ html, body {
         <button class="cat-btn" data-value="tax_fee"><span class="cat-icon">🧾</span><span class="cat-name">ภาษี & ค่าราชการ</span></button>
         <button class="cat-btn" data-value="other"><span class="cat-icon">📌</span><span class="cat-name">อื่นๆ</span></button>
       </div>
+      <div id="subcat-section" style="display:none;margin-top:8px">
+        <div class="subcat-section-label">หมวดย่อย (ไม่บังคับ)</div>
+        <div class="subcat-chips" id="subcat-chips"></div>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">ประเภท</label>
@@ -1123,6 +1139,21 @@ const CATS = {
 };
 
 const BUDGET_KEYS = ['food','utilities','transport','maintenance','health','insurance','education','clothing','entertainment','gift_social','child','parent_care','tax_fee','other'];
+
+const SUBCATS = {
+  food:         [ {v:'homecook',  n:'ทำกินเอง / ของสด'}, {v:'restaurant', n:'กินนอกบ้าน'}, {v:'delivery', n:'เดลิเวอรี่'}, {v:'drinks', n:'กาแฟ & เครื่องดื่ม'} ],
+  utilities:    [ {v:'electric',  n:'ค่าไฟฟ้า'}, {v:'water', n:'ค่าน้ำประปา'}, {v:'internet', n:'อินเทอร์เน็ต'}, {v:'mobile', n:'โทรศัพท์มือถือ'} ],
+  transport:    [ {v:'fuel',      n:'น้ำมันรถ'}, {v:'transit', n:'ค่าโดยสาร (แท็กซี่ / Grab)'}, {v:'parking', n:'ที่จอดรถ / ทางด่วน'} ],
+  health:       [ {v:'doctor',    n:'ค่าหมอ / โรงพยาบาล'}, {v:'medicine', n:'ยาและอุปกรณ์'}, {v:'fitness', n:'ฟิตเนส / กีฬา'} ],
+  insurance:    [ {v:'life',      n:'ประกันชีวิต'}, {v:'health_ins', n:'ประกันสุขภาพ'}, {v:'car_ins', n:'ประกันรถ'}, {v:'home_ins', n:'ประกันบ้าน'} ],
+  maintenance:  [ {v:'home_fix',  n:'ซ่อมบ้าน / ของใช้ในบ้าน'}, {v:'car_fix', n:'ซ่อมรถ'}, {v:'cleaning', n:'ค่าทำความสะอาด'} ],
+  clothing:     [ {v:'clothes',   n:'เสื้อผ้า / รองเท้า'}, {v:'personal', n:'ของใช้ส่วนตัว'}, {v:'cosmetics', n:'เครื่องสำอาง'} ],
+  entertainment:[ {v:'streaming', n:'Streaming (Netflix / YouTube)'}, {v:'gaming', n:'เกม / App'}, {v:'travel', n:'ท่องเที่ยว / ทริป'}, {v:'activity', n:'กิจกรรมบันเทิงอื่น'} ],
+  gift_social:  [ {v:'gift',      n:'ของขวัญ / เงินซอง'}, {v:'party', n:'งานเลี้ยง / สังสรรค์'}, {v:'donation', n:'บริจาค / ทำบุญ'} ],
+  education:    [ {v:'tuition',   n:'ค่าเทอม / หนังสือ'}, {v:'online_c', n:'คอร์สออนไลน์'}, {v:'supplies', n:'อุปกรณ์การเรียน'} ],
+  child:        [ {v:'baby_item', n:'ของใช้เด็ก / ผ้าอ้อม'}, {v:'milk_food', n:'นม / อาหารเด็ก'}, {v:'child_doc', n:'ค่าหมอเด็ก'}, {v:'toys_edu', n:'ของเล่น / การศึกษาเด็ก'} ],
+  parent_care:  [ {v:'daily',     n:'ค่าใช้จ่ายดูแลพ่อแม่'}, {v:'elder_med', n:'ค่ารักษาพยาบาลผู้สูงอายุ'} ],
+};
 
 const DEBT_TYPES = {
   house:    { name: 'บ้าน / คอนโด',             icon: '🏠' },
@@ -1495,7 +1526,7 @@ function renderExpenses() {
       html += `<div class="tx-item" onclick="window._editExp('${e.id}')">
         <div class="tx-icon" style="background:${cat.color}22">${cat.icon}</div>
         <div class="tx-info">
-          <div class="tx-name">${cat.name}${e.note ? ' — '+e.note : ''}</div>
+          <div class="tx-name">${cat.name}${e.subcategory ? ' · '+((SUBCATS[e.category]||[]).find(s=>s.v===e.subcategory)?.n||e.subcategory) : ''}${e.note ? ' — '+e.note : ''}</div>
           <div class="tx-meta">${PAYERS[e.payer]||e.payer} · ${e.type==='family'?'ครอบครัว':'ส่วนตัว'} · ${pmLabel}</div>
         </div>
         <div class="tx-amount ${isDebt?'debt-amt':''}">${fmt(e.amount)}</div>
@@ -1513,6 +1544,7 @@ window._editExp = id => {
   document.getElementById('in-date').value = e.date;
   document.getElementById('in-amount').value = e.amount;
   setActiveCat(e.category);
+  if (e.subcategory) setActiveSubcat(e.subcategory);
   document.getElementById('in-note').value = e.note || '';
   setPill('pg-type', e.type); setPill('pg-payer', e.payer); setPill('pg-payment', e.paymentMethod);
   document.getElementById('exp-delete').style.display = 'block';
@@ -1530,13 +1562,32 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
 });
 
 // ===== Category Grid =====
+let activeSubcat = null;
 function getActiveCat() {
   return document.querySelector('.cat-btn.active')?.dataset.value || 'food';
+}
+function getActiveSubcat() { return activeSubcat; }
+function setActiveSubcat(val) {
+  activeSubcat = val;
+  document.querySelectorAll('.subcat-chip').forEach(c => c.classList.toggle('active', c.dataset.value === val));
+}
+function updateSubcatUI(cat) {
+  const subs = SUBCATS[cat];
+  const section = document.getElementById('subcat-section');
+  const chips = document.getElementById('subcat-chips');
+  if (!subs || !subs.length) { section.style.display = 'none'; activeSubcat = null; return; }
+  chips.innerHTML = subs.map(s => `<button type="button" class="subcat-chip" data-value="${s.v}">${s.n}</button>`).join('');
+  chips.querySelectorAll('.subcat-chip').forEach(chip => {
+    chip.addEventListener('click', () => setActiveSubcat(chip.dataset.value === activeSubcat ? null : chip.dataset.value));
+  });
+  activeSubcat = null;
+  section.style.display = 'block';
 }
 function setActiveCat(val) {
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
   const target = document.querySelector(`.cat-btn[data-value="${val}"]`);
   if (target) target.classList.add('active');
+  updateSubcatUI(val);
 }
 document.querySelectorAll('.cat-btn').forEach(btn => {
   btn.addEventListener('click', () => setActiveCat(btn.dataset.value));
@@ -1622,6 +1673,7 @@ document.getElementById('exp-save').addEventListener('click', async () => {
     date: document.getElementById('in-date').value,
     amount,
     category: getActiveCat(),
+    subcategory: getActiveSubcat() || null,
     type: getPill('pg-type'),
     payer: getPill('pg-payer'),
     paymentMethod: getPill('pg-payment'),
