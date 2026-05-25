@@ -1223,7 +1223,7 @@ document.getElementById('btn-logout').addEventListener('click', () => signOut(au
 
 // ===== Export Excel =====
 document.getElementById('btn-export').addEventListener('click', () => {
-  if (!expenses.length && !incomes.length && !debts.length) {
+  if (!expenses.length && !incomes.length && !savings.length && !debts.length) {
     showToast('ยังไม่มีข้อมูล'); return;
   }
   const wb = XLSX.utils.book_new();
@@ -1265,7 +1265,31 @@ document.getElementById('btn-export').addEventListener('click', () => {
     XLSX.utils.book_append_sheet(wb, ws, 'รายรับ');
   }
 
-  // Sheet 3: หนี้สิน
+  // Sheet 3: เงินออม & การลงทุน
+  if (savings.length) {
+    const rows = savings.map(s => {
+      const t    = SV_TYPES[s.type] || { name: s.type, icon: '' };
+      const val  = s.currentValue > 0 ? s.currentValue : s.amount || 0;
+      const ret  = s.currentValue > 0 ? s.currentValue - s.amount : null;
+      const retPct = (s.amount > 0 && ret !== null) ? (ret / s.amount * 100) : null;
+      const prog = (s.goal > 0 && val > 0) ? Math.min(val / s.goal * 100, 100) : null;
+      return {
+        'ชื่อพอร์ต':              s.name || s.note || '',
+        'ประเภท':                 t.name,
+        'ยอดเงินเติม (บาท)':     Number(s.amount) || 0,
+        'มูลค่าปัจจุบัน (บาท)':  val,
+        'กำไร/ขาดทุน (บาท)':    ret !== null ? ret : '',
+        'ผลตอบแทน (%)':          retPct !== null ? Number(retPct.toFixed(2)) : '',
+        'เป้าหมาย (บาท)':        s.goal > 0 ? Number(s.goal) : '',
+        'ความคืบหน้า (%)':       prog !== null ? Number(prog.toFixed(1)) : '',
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch:20 },{ wch:12 },{ wch:18 },{ wch:18 },{ wch:18 },{ wch:14 },{ wch:16 },{ wch:16 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'เงินออม & ลงทุน');
+  }
+
+  // Sheet 4: หนี้สิน
   if (debts.length) {
     const debtTypeName = t => ({ house:'บ้าน/คอนโด', car:'รถ', personal:'สินเชื่อส่วนบุคคล', credit:'บัตรเครดิต/ผ่อน' }[t] || t);
     const rows = debts.map(d => ({
