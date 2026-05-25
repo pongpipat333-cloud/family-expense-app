@@ -10,6 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <title>รายจ่ายครอบครัว</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -97,6 +98,7 @@ html, body {
 .header-right { display: flex; align-items: center; gap: 8px; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
 .btn-logout { font-size: 13px; color: var(--text-2); background: none; border: none; cursor: pointer; padding: 4px 8px; font-family: inherit; }
+.btn-export { font-size: 13px; color: var(--accent); background: var(--accent-bg); border: 1.5px solid var(--accent); border-radius: 8px; cursor: pointer; padding: 4px 10px; font-family: inherit; font-weight: 500; display: flex; align-items: center; gap: 4px; }
 
 .tab-content-area {
   flex: 1;
@@ -477,6 +479,7 @@ html, body {
     <div class="header-title">💰 รายจ่ายครอบครัว</div>
     <div class="header-right">
       <img id="user-avatar" class="avatar" src="" alt="" style="display:none">
+      <button class="btn-export" id="btn-export">⬇️ Excel</button>
       <button class="btn-logout" id="btn-logout">ออก</button>
     </div>
   </header>
@@ -1217,6 +1220,72 @@ document.getElementById('btn-signin').addEventListener('click', async () => {
 });
 
 document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+// ===== Export Excel =====
+document.getElementById('btn-export').addEventListener('click', () => {
+  if (!expenses.length && !incomes.length && !debts.length) {
+    showToast('ยังไม่มีข้อมูล'); return;
+  }
+  const wb = XLSX.utils.book_new();
+  const pmName = v => ({ cash:'เงินสด', credit:'บัตรเครดิต', transfer:'โอนเงิน', spaylater:'SPayLater' }[v] || v);
+  const subcatName = (cat, sub) => (SUBCATS[cat]||[]).find(s=>s.v===sub)?.n || sub || '';
+
+  // Sheet 1: รายจ่าย
+  if (expenses.length) {
+    const rows = expenses
+      .slice().sort((a,b) => a.date < b.date ? 1 : -1)
+      .map(e => ({
+        'วันที่':         e.date,
+        'หมวดหมู่':      CATS[e.category]?.name || e.category,
+        'หมวดย่อย':     subcatName(e.category, e.subcategory),
+        'ประเภท':        e.type === 'family' ? 'ครอบครัว' : 'ส่วนตัว',
+        'ผู้จ่าย':       PAYERS[e.payer] || e.payer,
+        'ช่องทางชำระ':   pmName(e.paymentMethod),
+        'จำนวนเงิน (บาท)': Number(e.amount),
+        'รายละเอียด':    e.note || '',
+      }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch:12 },{ wch:22 },{ wch:22 },{ wch:10 },{ wch:8 },{ wch:14 },{ wch:16 },{ wch:24 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'รายจ่าย');
+  }
+
+  // Sheet 2: รายรับ
+  if (incomes.length) {
+    const rows = incomes
+      .slice().sort((a,b) => a.date < b.date ? 1 : -1)
+      .map(e => ({
+        'วันที่':         e.date,
+        'ประเภท':        e.type || '',
+        'ผู้รับ':         PAYERS[e.payer] || e.payer || '',
+        'จำนวนเงิน (บาท)': Number(e.amount),
+        'รายละเอียด':    e.note || '',
+      }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch:12 },{ wch:18 },{ wch:10 },{ wch:16 },{ wch:24 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'รายรับ');
+  }
+
+  // Sheet 3: หนี้สิน
+  if (debts.length) {
+    const debtTypeName = t => ({ house:'บ้าน/คอนโด', car:'รถ', personal:'สินเชื่อส่วนบุคคล', credit:'บัตรเครดิต/ผ่อน' }[t] || t);
+    const rows = debts.map(d => ({
+      'ชื่อรายการ':               d.name || '',
+      'ประเภทหนี้':               debtTypeName(d.type),
+      'วงเงินกู้จริง (บาท)':      Number(d.original) || 0,
+      'ยอดคงเหลือ (บาท)':        Number(d.remaining) || 0,
+      'ค่างวด/เดือน (บาท)':      Number(d.monthly) || 0,
+      'งวดที่เหลือ':              Number(d.months) || 0,
+      'ดอกเบี้ย (%/ปี)':          Number(d.interest) || 0,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch:20 },{ wch:20 },{ wch:18 },{ wch:18 },{ wch:18 },{ wch:12 },{ wch:14 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'หนี้สิน');
+  }
+
+  const today = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `family-expense-${today}.xlsx`);
+  showToast('ดาวน์โหลด Excel แล้ว ✅');
+});
 
 onAuthStateChanged(auth, user => {
   if (user) {
