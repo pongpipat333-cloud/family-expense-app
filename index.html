@@ -716,100 +716,165 @@ html, body {
     <div class="tab-panel" id="panel-guide">
       <div class="card">
 
+        <!-- ===== แท็บ 1: บันทึก ===== -->
         <div class="guide-section">
-          <div class="guide-title">วิธีการใช้งาน</div>
-          <div class="guide-step"><div class="step-num">1</div><div class="step-text">กดปุ่ม <strong>+</strong> มุมขวาล่าง เพื่อเพิ่มรายจ่ายใหม่ (แสดงเฉพาะในแท็บ "บันทึก")</div></div>
-          <div class="guide-step"><div class="step-num">2</div><div class="step-text">กรอก <strong>จำนวนเงิน</strong> และเลือก <strong>หมวดหมู่</strong> จากรายการที่มีให้</div></div>
-          <div class="guide-step"><div class="step-num">3</div><div class="step-text">เลือก <strong>ประเภท</strong>: <em>ส่วนตัว</em> = ของคนนั้นคนเดียว / <em>ครอบครัว</em> = ของกลาง ทุกคนได้ใช้</div></div>
-          <div class="guide-step"><div class="step-num">4</div><div class="step-text">เลือก <strong>ผู้จ่าย</strong> = ใครเป็นคนควักเงินออกไปจริงๆ (ไม่ใช่ว่าของนั้นเป็นของใคร)</div></div>
-          <div class="guide-step"><div class="step-num">5</div><div class="step-text">เลือก <strong>ช่องทาง</strong>: เงินสด / บัตรเครดิต / โอนเงิน</div></div>
-          <div class="guide-step"><div class="step-num">6</div><div class="step-text">กด <strong>บันทึก</strong> — ข้อมูล sync ทุกอุปกรณ์ทันที</div></div>
-          <div class="guide-step"><div class="step-num">7</div><div class="step-text">กดที่รายการที่มีอยู่เพื่อ <strong>แก้ไขหรือลบ</strong></div></div>
+          <div class="guide-title">📋 แท็บ "บันทึก" — รายจ่าย & รายรับ</div>
+          <div class="guide-step"><div class="step-num">1</div><div class="step-text">สลับระหว่าง <strong>รายจ่าย</strong> และ <strong>รายรับ</strong> ด้วยปุ่มสองปุ่มบนสุด</div></div>
+          <div class="guide-step"><div class="step-num">2</div><div class="step-text">กดปุ่ม <strong>+</strong> มุมขวาล่าง เพื่อเปิดฟอร์มบันทึก</div></div>
+          <div class="guide-step"><div class="step-num">3</div><div class="step-text">กรอก <strong>วันที่</strong> และ <strong>จำนวนเงิน</strong></div></div>
+          <div class="guide-step"><div class="step-num">4</div><div class="step-text">เลือก <strong>หมวดหมู่หลัก</strong> (14 หมวด) — เมื่อเลือกแล้วจะมี <strong>หมวดย่อย</strong> ปรากฏให้เลือกเพิ่มเติม (ไม่บังคับ) เช่น อาหาร → ทำกินเอง / กินนอกบ้าน / เดลิเวอรี่</div></div>
+          <div class="guide-step"><div class="step-num">5</div><div class="step-text">เลือก <strong>ประเภท</strong>: <em>ส่วนตัว</em> = ของคนๆ เดียว / <em>ครอบครัว</em> = ใช้ร่วมกันหรือของกลาง</div></div>
+          <div class="guide-step"><div class="step-num">6</div><div class="step-text">เลือก <strong>ผู้จ่าย</strong> = ใครเป็นคนควักเงินออกไปจริงๆ (พ่อ / แม่ / ลูก)</div></div>
+          <div class="guide-step"><div class="step-num">7</div><div class="step-text">เลือก <strong>ช่องทางชำระ</strong>: เงินสด / บัตรเครดิต / โอนเงิน / SPayLater</div></div>
+          <div class="guide-step"><div class="step-num">8</div><div class="step-text">กรอก <strong>รายละเอียด</strong> (ไม่บังคับ) เพื่อระบุรายการให้ชัดขึ้น</div></div>
+          <div class="guide-step"><div class="step-num">9</div><div class="step-text">กด <strong>บันทึก</strong> — ข้อมูล sync ทุกอุปกรณ์ทันที</div></div>
+          <div class="guide-step"><div class="step-num">10</div><div class="step-text">กดที่รายการในลิสต์เพื่อ <strong>แก้ไข</strong> หรือ <strong>ลบ</strong></div></div>
+          <div class="guide-step"><div class="step-num">11</div><div class="step-text">ใช้ <strong>ตัวกรอง</strong> ด้านบนลิสต์เพื่อดูเฉพาะผู้จ่าย หรือเฉพาะรายการส่วนตัว/ครอบครัว</div></div>
         </div>
 
+        <!-- ===== หมวดหมู่ทั้งหมด ===== -->
         <div class="guide-section">
-          <div class="guide-title">ตัวอย่างการบันทึก</div>
-
-          <div class="example-card">
-            <div class="example-title">ซื้อผงซักผ้า — ของกลางครอบครัว</div>
-            <div class="example-row"><span class="example-key">จำนวน</span><span class="example-val">189 บาท</span></div>
-            <div class="example-row"><span class="example-key">หมวดหมู่</span><span class="example-val">เสื้อผ้า & ของใช้</span></div>
-            <div class="example-row"><span class="example-key">ประเภท</span><span class="example-val">ครอบครัว</span></div>
-            <div class="example-row"><span class="example-key">ผู้จ่าย</span><span class="example-val">แม่</span></div>
-            <div class="example-row"><span class="example-key">ช่องทาง</span><span class="example-val">เงินสด</span></div>
-            <div class="example-row"><span class="example-key">รายละเอียด</span><span class="example-val">ผงซักผ้า Ariel 3kg</span></div>
-          </div>
-
-          <div class="example-card">
-            <div class="example-title">ค่าอาหารกลางวัน — ส่วนตัว</div>
-            <div class="example-row"><span class="example-key">จำนวน</span><span class="example-val">120 บาท</span></div>
-            <div class="example-row"><span class="example-key">หมวดหมู่</span><span class="example-val">อาหาร & เครื่องดื่ม</span></div>
-            <div class="example-row"><span class="example-key">ประเภท</span><span class="example-val">ส่วนตัว</span></div>
-            <div class="example-row"><span class="example-key">ผู้จ่าย</span><span class="example-val">พ่อ</span></div>
-            <div class="example-row"><span class="example-key">ช่องทาง</span><span class="example-val">เงินสด</span></div>
-          </div>
-
-          <div class="example-card">
-            <div class="example-title">ค่าเรียนลูก</div>
-            <div class="example-row"><span class="example-key">จำนวน</span><span class="example-val">3,500 บาท</span></div>
-            <div class="example-row"><span class="example-key">หมวดหมู่</span><span class="example-val">ค่าใช้จ่ายลูก</span></div>
-            <div class="example-row"><span class="example-key">ประเภท</span><span class="example-val">ครอบครัว</span></div>
-            <div class="example-row"><span class="example-key">ผู้จ่าย</span><span class="example-val">พ่อ</span></div>
-            <div class="example-row"><span class="example-key">ช่องทาง</span><span class="example-val">โอนเงิน</span></div>
-            <div class="example-row"><span class="example-key">รายละเอียด</span><span class="example-val">ค่าเรียนดนตรี เดือน พ.ค.</span></div>
-          </div>
-
-          <div class="example-card">
-            <div class="example-title">ค่ายาพ่อแม่ — ดูแลบุพการี</div>
-            <div class="example-row"><span class="example-key">จำนวน</span><span class="example-val">850 บาท</span></div>
-            <div class="example-row"><span class="example-key">หมวดหมู่</span><span class="example-val">ดูแลบุพการี</span></div>
-            <div class="example-row"><span class="example-key">ประเภท</span><span class="example-val">ครอบครัว</span></div>
-            <div class="example-row"><span class="example-key">ผู้จ่าย</span><span class="example-val">แม่</span></div>
-            <div class="example-row"><span class="example-key">รายละเอียด</span><span class="example-val">ค่ายาเบาหวานคุณแม่</span></div>
-          </div>
-
-          <div class="example-card">
-            <div class="example-title">ซื้อของด้วยบัตรเครดิต — วิธีบันทึก</div>
-            <div class="example-row"><span class="example-key">ตอนซื้อ</span><span class="example-val">บันทึกรายจ่ายทันที เหมือนจ่ายเงินสด</span></div>
-            <div class="example-row"><span class="example-key">ช่องทาง</span><span class="example-val">บัตรเครดิต</span></div>
-            <div class="example-row"><span class="example-key">ตอนบิลมา</span><span class="example-val">โอนจ่ายธนาคารเลย ไม่ต้องบันทึกซ้ำ</span></div>
-            <div class="example-note">💡 เลือกช่องทาง "บัตรเครดิต" เพื่อให้กรองดูได้ว่าเดือนนี้รูดไปเท่าไหร่</div>
-          </div>
-
-          <div class="example-card">
-            <div class="example-title">ผ่อน iPad 10 เดือน 0% — วิธีบันทึก</div>
-            <div class="example-row"><span class="example-key">ขั้นที่ 1</span><span class="example-val">เพิ่มใน แท็บ "หนี้สิน" ครั้งเดียว</span></div>
-            <div class="example-row"><span class="example-key">ยอดรวม</span><span class="example-val">30,000 บาท · งวดละ 3,000 / 10 งวด</span></div>
-            <div class="example-row"><span class="example-key">ขั้นที่ 2</span><span class="example-val">บิลมาทุกเดือน → กด "บันทึกจ่ายงวดนี้" ในการ์ดหนี้</span></div>
-            <div class="example-note">💡 ผ่อนหลายงวด = ใช้แท็บหนี้ติดตาม ไม่บันทึกเป็นรายจ่ายซ้ำ</div>
+          <div class="guide-title">🗂 หมวดหมู่รายจ่าย (14 หมวดหลัก)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px">
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">🍜 อาหาร & เครื่องดื่ม<div style="font-size:11px;color:var(--text-3);margin-top:2px">ทำกินเอง · กินนอกบ้าน · เดลิเวอรี่ · กาแฟ</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">💡 สาธารณูปโภค<div style="font-size:11px;color:var(--text-3);margin-top:2px">ไฟฟ้า · น้ำ · อินเทอร์เน็ต · มือถือ</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">🚗 การเดินทาง<div style="font-size:11px;color:var(--text-3);margin-top:2px">น้ำมัน · Grab/แท็กซี่ · ที่จอดรถ</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">🔧 ของใช้ในบ้าน & ซ่อมบำรุง<div style="font-size:11px;color:var(--text-3);margin-top:2px">ของใช้บ้าน · ซ่อมบ้าน · ซ่อมรถ · ทำความสะอาด</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">💊 สุขภาพ & ยา<div style="font-size:11px;color:var(--text-3);margin-top:2px">หมอ/โรงพยาบาล · ยา · ฟิตเนส</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">🛡️ ประกัน<div style="font-size:11px;color:var(--text-3);margin-top:2px">ประกันชีวิต · สุขภาพ · รถ · บ้าน</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">📚 การศึกษา<div style="font-size:11px;color:var(--text-3);margin-top:2px">ค่าเทอม · คอร์สออนไลน์ · อุปกรณ์</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">👕 เสื้อผ้า & ของใช้<div style="font-size:11px;color:var(--text-3);margin-top:2px">เสื้อผ้า · ของใช้ส่วนตัว · เครื่องสำอาง</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">🎬 ความบันเทิง<div style="font-size:11px;color:var(--text-3);margin-top:2px">Streaming · เกม · ท่องเที่ยว · กิจกรรม</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">🎁 ของขวัญ & สังคม<div style="font-size:11px;color:var(--text-3);margin-top:2px">ของขวัญ/ซอง · งานเลี้ยง · บริจาค</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">👶 ค่าใช้จ่ายลูก<div style="font-size:11px;color:var(--text-3);margin-top:2px">ของใช้เด็ก · นม/อาหาร · หมอเด็ก · ของเล่น</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">👴 ดูแลบุพการี<div style="font-size:11px;color:var(--text-3);margin-top:2px">ค่าใช้จ่ายดูแลพ่อแม่ · ค่ารักษา</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">🧾 ภาษี & ค่าราชการ<div style="font-size:11px;color:var(--text-3);margin-top:2px">ภาษี · ค่าธรรมเนียมราชการ</div></div>
+            <div style="padding:8px 10px;background:var(--bg);border-radius:8px">📌 อื่นๆ<div style="font-size:11px;color:var(--text-3);margin-top:2px">รายจ่ายที่ไม่เข้าหมวดไหน</div></div>
           </div>
         </div>
 
+        <!-- ===== แท็บ 2: สรุป ===== -->
         <div class="guide-section">
-          <div class="guide-title">คำถามที่พบบ่อย</div>
+          <div class="guide-title">📊 แท็บ "สรุป" — ภาพรวมรายเดือน</div>
+          <div class="guide-step"><div class="step-num">◀▶</div><div class="step-text">กดลูกศรซ้าย/ขวาเพื่อดูข้อมูล <strong>ย้อนหลังรายเดือน</strong></div></div>
+          <div class="guide-step"><div class="step-num">🍩</div><div class="step-text"><strong>กราฟโดนัท</strong> แสดงสัดส่วนรายจ่ายแต่ละหมวด — แตะที่ชิ้นเพื่อดูรายละเอียด</div></div>
+          <div class="guide-step"><div class="step-num">📊</div><div class="step-text"><strong>กราฟแท่ง</strong> แสดงรายจ่าย 6 เดือนย้อนหลัง เทียบกันให้เห็น trend</div></div>
+          <div class="guide-step"><div class="step-num">💳</div><div class="step-text"><strong>ตารางหมวดหมู่</strong> สรุปยอดรายจ่ายแต่ละหมวด เทียบงบประมาณที่ตั้งไว้</div></div>
+          <div class="guide-step"><div class="step-num">💰</div><div class="step-text">ยอด <strong>รายรับ vs รายจ่าย</strong> และ <strong>คงเหลือ</strong> ของแต่ละเดือน</div></div>
+        </div>
+
+        <!-- ===== แท็บ 3: สุขภาพการเงิน ===== -->
+        <div class="guide-section">
+          <div class="guide-title">❤️ แท็บ "สุขภาพ" — ตัวชี้วัดทางการเงิน</div>
           <div class="faq-item">
-            <div class="faq-q">บัตรเครดิตบันทึกยังไง?</div>
-            <div class="faq-a">บันทึกทันทีตอนซื้อ เหมือนจ่ายเงินสด — เลือกช่องทาง "บัตรเครดิต" ไว้ ตอนบิลมาโอนจ่ายธนาคารได้เลย ไม่ต้องบันทึกซ้ำ</div>
+            <div class="faq-q">อัตราการออมเดือนนี้ (%)</div>
+            <div class="faq-a">= (รายรับ − รายจ่าย) ÷ รายรับ × 100 — เป้าหมายดี: <strong>≥ 20%</strong> ขึ้นไป</div>
           </div>
           <div class="faq-item">
-            <div class="faq-q">ของกลาง ใส่ผู้จ่ายเป็นใคร?</div>
-            <div class="faq-a">ใส่คนที่ "ควักเงินจ่ายออกไปจริงๆ" ไม่ใช่คนที่ได้ใช้ของ เลือก ประเภท = "ครอบครัว"</div>
+            <div class="faq-q">Net Worth (ความมั่งคั่งสุทธิ)</div>
+            <div class="faq-a">= เงินออม + มูลค่าลงทุน − หนี้คงเหลือทั้งหมด — ตัวเลขนี้ควรเพิ่มขึ้นทุกปี</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">DTI — หนี้/รายได้ (%)</div>
+            <div class="faq-a">= ค่างวดรวมต่อเดือน ÷ รายรับเดือนนี้ × 100<br>✅ ≤ 35% = ปลอดภัย · ⚠️ 36–45% = ควรระวัง · 🔴 &gt; 45% = สูงเกินไป</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">🛡 Emergency Fund — กี่เดือน</div>
+            <div class="faq-a">= เงินออม (เข้าถึงได้ทันที) ÷ ค่าใช้จ่ายเฉลี่ย 3 เดือนล่าสุด<br>นับเฉพาะพอร์ตประเภท "เงินออม" — ไม่รวมกองทุน/หุ้น/คริปโต<br>✅ ≥ 6 เดือน = ดี · ⚠️ 3–5 เดือน = พอไหว · 🔴 &lt; 3 เดือน = ต้องเพิ่ม</div>
+          </div>
+        </div>
+
+        <!-- ===== แท็บ 4: หนี้สิน ===== -->
+        <div class="guide-section">
+          <div class="guide-title">💳 แท็บ "หนี้สิน" — ติดตามหนี้ทุกประเภท</div>
+          <div class="guide-step"><div class="step-num">+</div><div class="step-text">กด <strong>+ เพิ่มรายการหนี้</strong> แล้วกรอก: ชื่อรายการ · ประเภทหนี้ · วงเงินกู้จริง · ยอดคงเหลือปัจจุบัน · ค่างวด/เดือน · จำนวนงวดที่เหลือ · ดอกเบี้ย %/ปี</div></div>
+          <div class="guide-step"><div class="step-num">📊</div><div class="step-text">แถบ stat ด้านบนแสดง: หนี้รวม · ค่างวด/เดือน · ดอกเบี้ย/เดือน (% เสียเปล่า) · ต้นที่ลดจริง/เดือน (% ลดหนี้จริง) · DTI</div></div>
+          <div class="guide-step"><div class="step-num">💰</div><div class="step-text">กด <strong>"บันทึกจ่ายงวดนี้"</strong> ในการ์ดหนี้เมื่อจ่ายแต่ละงวด — ระบบจะลดยอดคงเหลือและนับงวดให้อัตโนมัติ</div></div>
+          <div class="guide-step"><div class="step-num">🏷</div><div class="step-text">หนี้ถูกแบ่งเป็น 2 กลุ่ม: <strong>บ้าน & รถ</strong> (ระยะยาว) และ <strong>สินเชื่อ & บัตรเครดิต</strong> (ระยะสั้น)</div></div>
+          <div class="example-note" style="margin-top:8px">💡 <strong>ค่างวดผ่อนบ้าน/รถ</strong> ไม่ต้องบันทึกซ้ำในแท็บบันทึก — ใช้แท็บหนี้ติดตามแทน เพื่อไม่ให้นับซ้ำ</div>
+        </div>
+
+        <!-- ===== แท็บ 5: ออม/ลงทุน ===== -->
+        <div class="guide-section">
+          <div class="guide-title">💎 แท็บ "ออม/ลงทุน" — พอร์ตการออมและลงทุน</div>
+          <div class="guide-step"><div class="step-num">+</div><div class="step-text">กด <strong>+ เพิ่มพอร์ต</strong> — ตั้งชื่อ เลือกประเภท และกรอกยอดเงิน</div></div>
+          <div class="faq-item">
+            <div class="faq-q">🏦 เงินออม</div>
+            <div class="faq-a">บัญชีออมทรัพย์ เงินสด สลากออมสิน ฯลฯ — กรอก <strong>ยอดเงินปัจจุบัน</strong> และ <strong>เป้าหมาย</strong> (ไม่บังคับ) จะแสดงแถบ progress</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">📈 กองทุน / 📊 หุ้น/ETF / 🪙 คริปโต</div>
+            <div class="faq-a">กรอก <strong>ต้นทุน</strong> (เงินที่ลงไป) และอัปเดต <strong>มูลค่าปัจจุบัน</strong> เมื่อต้องการ — ระบบคำนวณกำไร/ขาดทุน และ % ผลตอบแทนให้</div>
+          </div>
+          <div class="guide-step"><div class="step-num">⋯</div><div class="step-text">กดปุ่ม <strong>⋯</strong> บนการ์ดเพื่อ <strong>แก้ไข</strong> หรือ <strong>ลบ</strong> พอร์ต</div></div>
+          <div class="guide-step"><div class="step-num">📊</div><div class="step-text"><strong>วงกลม donut</strong> บนการ์ดลงทุนแสดงสัดส่วนของพอร์ตนั้นเทียบกับ <strong>มูลค่าลงทุนรวม</strong> ทั้งหมด</div></div>
+          <div class="guide-step"><div class="step-num">🛡</div><div class="step-text">Emergency Fund คำนวณจาก <strong>เงินออมเท่านั้น</strong> (ไม่รวมกองทุน/หุ้น/คริปโต) หารด้วยค่าใช้จ่ายเฉลี่ย 3 เดือนล่าสุด</div></div>
+        </div>
+
+        <!-- ===== Export & ฟังก์ชันพิเศษ ===== -->
+        <div class="guide-section">
+          <div class="guide-title">⬇️ Export ข้อมูลเป็น Excel</div>
+          <div class="guide-step"><div class="step-num">1</div><div class="step-text">กดปุ่ม <strong>⬇️ Excel</strong> ที่มุมขวาบน header</div></div>
+          <div class="guide-step"><div class="step-num">2</div><div class="step-text">ไฟล์ <code>family-expense-YYYY-MM-DD.xlsx</code> จะถูก download ทันที</div></div>
+          <div class="guide-step"><div class="step-num">3</div><div class="step-text">ไฟล์มี <strong>4 sheets</strong>: รายจ่าย · รายรับ · เงินออม & ลงทุน · หนี้สิน</div></div>
+          <div class="example-note" style="margin-top:4px">💡 ข้อมูลทั้งหมดอยู่ในอุปกรณ์และ Firebase ของคุณ — ไม่มีการส่งออกไปที่อื่น</div>
+        </div>
+
+        <!-- ===== ตัวอย่าง ===== -->
+        <div class="guide-section">
+          <div class="guide-title">📝 ตัวอย่างการบันทึก</div>
+
+          <div class="example-card">
+            <div class="example-title">บัตรเครดิต / SPayLater — วิธีบันทึก</div>
+            <div class="example-row"><span class="example-key">ตอนซื้อ</span><span class="example-val">บันทึกรายจ่ายทันที</span></div>
+            <div class="example-row"><span class="example-key">ช่องทาง</span><span class="example-val">บัตรเครดิต หรือ SPayLater</span></div>
+            <div class="example-row"><span class="example-key">ตอนบิลมา</span><span class="example-val">โอนจ่ายธนาคาร ไม่ต้องบันทึกซ้ำ</span></div>
+            <div class="example-note">💡 กรองดูยอดรูดบัตรเครดิตเดือนนี้ได้จากตัวกรอง "ช่องทาง"</div>
+          </div>
+
+          <div class="example-card">
+            <div class="example-title">ผ่อนสินค้า / iPad หลายงวด</div>
+            <div class="example-row"><span class="example-key">ขั้นที่ 1</span><span class="example-val">เพิ่มใน แท็บ "หนี้สิน" 1 ครั้ง</span></div>
+            <div class="example-row"><span class="example-key">ยอด</span><span class="example-val">30,000 บาท · งวดละ 3,000 / 10 งวด</span></div>
+            <div class="example-row"><span class="example-key">ขั้นที่ 2</span><span class="example-val">บิลมาทุกเดือน → กด "บันทึกจ่ายงวดนี้"</span></div>
+            <div class="example-note">💡 ไม่ต้องบันทึกซ้ำในแท็บรายจ่าย — ระบบลดยอดหนี้ให้อัตโนมัติ</div>
+          </div>
+
+          <div class="example-card">
+            <div class="example-title">อาหาร — ใช้หมวดย่อย</div>
+            <div class="example-row"><span class="example-key">หมวดหลัก</span><span class="example-val">🍜 อาหาร & เครื่องดื่ม</span></div>
+            <div class="example-row"><span class="example-key">หมวดย่อย</span><span class="example-val">เดลิเวอรี่</span></div>
+            <div class="example-row"><span class="example-key">ช่องทาง</span><span class="example-val">SPayLater</span></div>
+            <div class="example-note">💡 หมวดย่อยช่วยให้วิเคราะห์ได้ละเอียดขึ้น เช่น รู้ว่าออเดอร์ Grab เยอะแค่ไหน</div>
+          </div>
+        </div>
+
+        <!-- ===== FAQ ===== -->
+        <div class="guide-section">
+          <div class="guide-title">❓ คำถามที่พบบ่อย</div>
+          <div class="faq-item">
+            <div class="faq-q">ข้อมูล sync ระหว่างอุปกรณ์ได้ไหม?</div>
+            <div class="faq-a">ได้ทันที — Login ด้วย Google account เดียวกันทุกเครื่อง ข้อมูลซิงค์อัตโนมัติผ่าน Firebase</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">ของกลางครอบครัว ใส่ผู้จ่ายเป็นใคร?</div>
+            <div class="faq-a">ใส่คนที่ "ควักเงินจ่ายออกไปจริงๆ" เลือก ประเภท = "ครอบครัว" — แยกกันสองอย่างนี้ได้</div>
           </div>
           <div class="faq-item">
             <div class="faq-q">เงินออมและลงทุนบันทึกที่ไหน?</div>
-            <div class="faq-a">บันทึกในแท็บ "ออม/ลงทุน" แยกจากรายจ่ายทั่วไป เพื่อให้ตัวเลขรายจ่ายถูกต้อง</div>
+            <div class="faq-a">บันทึกในแท็บ "ออม/ลงทุน" แยกต่างหาก — <strong>ไม่ต้องบันทึกในแท็บรายจ่าย</strong> เพื่อให้ตัวเลขค่าใช้จ่ายและอัตราการออมถูกต้อง</div>
           </div>
           <div class="faq-item">
-            <div class="faq-q">ค่าผ่อนบ้าน/รถบันทึกยังไง?</div>
-            <div class="faq-a">บันทึกใน แท็บ "หนี้สิน" เพื่อติดตามยอดคงเหลือ จากนั้นบันทึกค่างวดรายเดือนในแท็บ "บันทึก" หมวด ผ่อนบ้าน/รถ</div>
+            <div class="faq-q">Net Worth ติดลบแปลว่าอะไร?</div>
+            <div class="faq-a">หนี้รวมมากกว่าสินทรัพย์รวม — ปกติมากถ้าเพิ่งผ่อนบ้าน ดูแนวโน้มว่า Net Worth เพิ่มขึ้นทุกปีไหม สำคัญกว่าตัวเลขปัจจุบัน</div>
           </div>
           <div class="faq-item">
-            <div class="faq-q">ข้อมูล sync ได้ไหม?</div>
-            <div class="faq-a">ได้ทันที — Login ด้วย Google account เดียวกันทุกอุปกรณ์ ข้อมูลจะซิงค์อัตโนมัติ</div>
+            <div class="faq-q">ติดตั้งเป็นแอปบน iPhone ยังไง?</div>
+            <div class="faq-a">Safari → กดปุ่ม Share (กล่องลูกศรขึ้น) → "Add to Home Screen" → ได้ไอคอนบนหน้าจอเหมือนแอปจริง ใช้ได้แม้ไม่มีสัญญาณ</div>
           </div>
           <div class="faq-item">
-            <div class="faq-q">ใช้บน iPhone ยังไง?</div>
-            <div class="faq-a">เปิดเว็บใน Safari → กดปุ่ม Share → "Add to Home Screen" → จะได้ไอคอนบนหน้าจอเหมือนแอปจริง</div>
+            <div class="faq-q">ติดตั้งบน Android ยังไง?</div>
+            <div class="faq-a">Chrome → กดจุดสามจุด (⋮) → "Add to Home screen" หรือ "Install app"</div>
           </div>
         </div>
 
