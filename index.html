@@ -1031,9 +1031,15 @@ html, body {
       <label class="form-label">จำนวนที่จ่ายจริง (บาท)</label>
       <input type="number" class="form-input" id="pay-amount" inputmode="decimal" placeholder="0">
     </div>
+    <div class="form-group">
+      <label class="form-label">ดอกเบี้ยเดือนนี้ (บาท)</label>
+      <input type="number" class="form-input" id="pay-interest" inputmode="decimal" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">เงินต้นที่ลด (บาท)</label>
+      <input type="number" class="form-input" id="pay-principal" inputmode="decimal" placeholder="0">
+    </div>
     <div class="pay-preview" id="pay-preview">
-      <div class="pay-preview-row"><span>ดอกเบี้ยเดือนนี้</span><span id="prev-interest">฿0</span></div>
-      <div class="pay-preview-row"><span>เงินต้นที่ลด</span><span id="prev-principal">฿0</span></div>
       <div class="pay-preview-row warn" id="prev-warn" style="display:none"><span id="prev-warn-text"></span></div>
       <div class="pay-preview-row total"><span>ยอดหนี้ใหม่</span><span id="prev-new-bal" style="color:var(--red)">฿0</span></div>
     </div>
@@ -2178,36 +2184,44 @@ document.getElementById('debt-delete').addEventListener('click', async () => {
 // ===== Pay Debt Modal =====
 let payDebtId = null, payEditId = null, payEffectiveRemaining = 0;
 
-function calcPayPreview(remaining, monthly, interestPct, amount) {
+function suggestInterest(remaining, interestPct) {
   const r = (interestPct || 0) / 100 / 12;
-  const interestAmt = remaining * r;
-  const principalPaid = Math.max(0, amount - interestAmt);
-  const newBal = Math.max(0, remaining - principalPaid);
-  return { interestAmt, principalPaid, newBal };
+  return Math.round(remaining * r * 100) / 100;
 }
 
 function updatePayPreview() {
-  const d = debts.find(x => x.id === payDebtId); if (!d) return;
-  const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
-  const { interestAmt, principalPaid, newBal } = calcPayPreview(payEffectiveRemaining, d.monthly, d.interest, amount);
-  document.getElementById('prev-interest').textContent = fmt(interestAmt);
-  document.getElementById('prev-principal').textContent = fmt(principalPaid);
+  const amount    = parseFloat(document.getElementById('pay-amount').value)    || 0;
+  const interest  = parseFloat(document.getElementById('pay-interest').value)  || 0;
+  const principal = parseFloat(document.getElementById('pay-principal').value) || 0;
+  const newBal    = Math.max(0, payEffectiveRemaining - principal);
   document.getElementById('prev-new-bal').textContent = fmt(newBal);
-  const warnEl = document.getElementById('prev-warn');
+
+  const warnEl  = document.getElementById('prev-warn');
   const warnTxt = document.getElementById('prev-warn-text');
-  if (amount > 0 && amount < interestAmt) {
-    warnTxt.textContent = '⚠️ จ่ายน้อยกว่าดอกเบี้ย — ยอดต้นไม่ลด';
-    warnEl.style.display = 'flex';
-  } else if (d.monthly > 0 && amount > 0 && amount < d.monthly) {
-    warnTxt.textContent = `ℹ️ จ่ายน้อยกว่างวดปกติ (${fmt(d.monthly)})`;
-    warnEl.style.display = 'flex';
-  } else if (d.monthly > 0 && amount > d.monthly) {
-    const extra = principalPaid - Math.max(0, d.monthly - payEffectiveRemaining * (d.interest||0)/100/12);
-    warnTxt.textContent = `ℹ️ จ่ายมากกว่างวดปกติ — เงินต้นลดพิเศษ ${fmt(extra)} บาท`;
+  const diff    = Math.abs(amount - interest - principal);
+  if (amount > 0 && diff > 1) {
+    warnTxt.textContent = `⚠️ ดอกเบี้ย + เงินต้น (${fmt(interest+principal)}) ≠ ยอดจ่าย (${fmt(amount)})`;
     warnEl.style.display = 'flex';
   } else {
     warnEl.style.display = 'none';
   }
+}
+
+function onAmountChange() {
+  const d = debts.find(x => x.id === payDebtId); if (!d) return;
+  const amount   = parseFloat(document.getElementById('pay-amount').value) || 0;
+  const interest = parseFloat(document.getElementById('pay-interest').value) || suggestInterest(payEffectiveRemaining, d.interest);
+  const principal = Math.max(0, amount - interest);
+  document.getElementById('pay-principal').value = principal ? principal.toFixed(2) : '';
+  updatePayPreview();
+}
+
+function onInterestChange() {
+  const amount   = parseFloat(document.getElementById('pay-amount').value)   || 0;
+  const interest = parseFloat(document.getElementById('pay-interest').value) || 0;
+  const principal = Math.max(0, amount - interest);
+  document.getElementById('pay-principal').value = principal ? principal.toFixed(2) : '';
+  updatePayPreview();
 }
 
 function openPayModal(id, editPaymentId = null, prefill = {}) {
@@ -2216,24 +2230,35 @@ function openPayModal(id, editPaymentId = null, prefill = {}) {
   payEditId = editPaymentId;
   payEffectiveRemaining = prefill.balanceBefore ?? d.remaining;
   document.getElementById('pay-debt-name').textContent = d.name + (editPaymentId ? ' (แก้ไขการจ่าย)' : '');
-  document.getElementById('pay-date').value = prefill.date || today();
+  document.getElementById('pay-date').value   = prefill.date || today();
   document.getElementById('pay-amount').value = prefill.amount || d.monthly || '';
+  // prefill interest (from saved record or auto-suggest from rate)
+  const sugInt = prefill.interestAmt != null ? prefill.interestAmt : suggestInterest(payEffectiveRemaining, d.interest);
+  document.getElementById('pay-interest').value  = sugInt ? sugInt.toFixed(2) : '';
+  const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
+  const prefillPrincipal = prefill.principalPaid != null ? prefill.principalPaid : Math.max(0, amount - sugInt);
+  document.getElementById('pay-principal').value = prefillPrincipal ? prefillPrincipal.toFixed(2) : '';
   updatePayPreview();
   document.getElementById('pay-modal').classList.add('open');
 }
 
 window._payDebt = id => openPayModal(id);
 
-document.getElementById('pay-amount').addEventListener('input', updatePayPreview);
+document.getElementById('pay-amount').addEventListener('input', onAmountChange);
+document.getElementById('pay-interest').addEventListener('input', onInterestChange);
+document.getElementById('pay-principal').addEventListener('input', updatePayPreview);
 document.getElementById('pay-cancel').addEventListener('click', () =>
   document.getElementById('pay-modal').classList.remove('open'));
 
 document.getElementById('pay-confirm').addEventListener('click', async () => {
   const d = debts.find(x => x.id === payDebtId); if (!d) return;
-  const amount = parseFloat(document.getElementById('pay-amount').value);
+  const amount    = parseFloat(document.getElementById('pay-amount').value);
+  const interestAmt   = parseFloat(document.getElementById('pay-interest').value)  || 0;
+  const principalPaid = parseFloat(document.getElementById('pay-principal').value) || 0;
   if (isNaN(amount) || amount <= 0) { showToast('กรุณากรอกจำนวนเงินที่จ่าย'); return; }
-  const date = document.getElementById('pay-date').value;
-  const { interestAmt, principalPaid, newBal } = calcPayPreview(payEffectiveRemaining, d.monthly, d.interest, amount);
+  if (principalPaid <= 0) { showToast('กรุณากรอกเงินต้นที่ลด'); return; }
+  const date   = document.getElementById('pay-date').value;
+  const newBal = Math.max(0, payEffectiveRemaining - principalPaid);
   const newMonths = (d.months > 0 && principalPaid > 0) ? Math.max(0, d.months - 1) : (d.months || 0);
   const paymentData = {
     date, amount, interestAmt, principalPaid,
