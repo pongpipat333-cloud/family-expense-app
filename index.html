@@ -551,11 +551,11 @@ html, body {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="card" style="margin:0">
           <div class="card-title" style="font-size:13px">รายจ่ายแยกตามคน</div>
-          <canvas id="bar-chart" height="160"></canvas>
+          <div style="position:relative;height:160px"><canvas id="bar-chart"></canvas></div>
         </div>
         <div class="card" style="margin:0">
           <div class="card-title" style="font-size:13px">ส่วนตัว vs ครอบครัว</div>
-          <canvas id="type-chart" height="160"></canvas>
+          <div style="position:relative;height:160px"><canvas id="type-chart"></canvas></div>
         </div>
       </div>
       <div class="card">
@@ -1939,6 +1939,11 @@ function renderSummary() {
     }, 80);
   }
 
+  const byPersonal = me.filter(e=>e.type==='personal').reduce((s,e)=>s+Number(e.amount),0);
+  const byFamily   = me.filter(e=>e.type==='family').reduce((s,e)=>s+Number(e.amount),0);
+  const yMax = Math.ceil(Math.max(byDad,byMom,byChild,byPersonal,byFamily) * 1.15 / 500) * 500 || 1000;
+  const yOpts = { beginAtZero:true, max:yMax, ticks:{ callback:v=>'฿'+v.toLocaleString(), font:{size:10}, maxTicksLimit:5 }, grid:{color:'#f0f0f0'} };
+
   if (barChart) barChart.destroy();
   barChart = new Chart(document.getElementById('bar-chart').getContext('2d'), {
     type: 'bar',
@@ -1946,11 +1951,9 @@ function renderSummary() {
       labels: ['พ่อ','แม่','ลูก'],
       datasets: [{ data:[byDad,byMom,byChild], backgroundColor:['#4361ee','#e040fb','#00b894'], borderRadius:8 }]
     },
-    options: { responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{callback:v=>'฿'+v.toLocaleString(),font:{size:10}}, grid:{color:'#f0f0f0'}} } }
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:yOpts } }
   });
 
-  const byPersonal = me.filter(e=>e.type==='personal').reduce((s,e)=>s+Number(e.amount),0);
-  const byFamily   = me.filter(e=>e.type==='family').reduce((s,e)=>s+Number(e.amount),0);
   if (typeChart) typeChart.destroy();
   typeChart = new Chart(document.getElementById('type-chart').getContext('2d'), {
     type: 'bar',
@@ -1958,7 +1961,7 @@ function renderSummary() {
       labels: ['ส่วนตัว','ครอบครัว'],
       datasets: [{ data:[byPersonal,byFamily], backgroundColor:['#4361ee','#f4a261'], borderRadius:8 }]
     },
-    options: { responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{callback:v=>'฿'+v.toLocaleString(),font:{size:10}}, grid:{color:'#f0f0f0'}} } }
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:yOpts } }
   });
 
   let html = catList.length ? '' : '<div style="text-align:center;padding:20px;color:var(--text-2);font-size:14px">ไม่มีข้อมูล</div>';
