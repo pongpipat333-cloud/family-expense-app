@@ -546,7 +546,7 @@ html, body {
 
       <div class="card">
         <div class="card-title">สัดส่วนตามหมวดหมู่</div>
-        <canvas id="pie-chart" height="220"></canvas>
+        <div id="pie-wrap"><div class="h-no-data">ไม่มีข้อมูล</div></div>
       </div>
       <div class="card">
         <div class="card-title">รายจ่ายแยกตามคน</div>
@@ -1902,15 +1902,36 @@ function renderSummary() {
   me.forEach(e => { byCat[e.category] = (byCat[e.category]||0)+Number(e.amount); });
   const catList = Object.entries(byCat).sort((a,b) => b[1]-a[1]);
 
-  if (pieChart) pieChart.destroy();
-  pieChart = new Chart(document.getElementById('pie-chart').getContext('2d'), {
-    type: 'doughnut',
-    data: {
-      labels: catList.map(([k]) => CATS[k]?.name||k),
-      datasets: [{ data: catList.map(([,v])=>v), backgroundColor: catList.map(([k])=>CATS[k]?.color||'#ccc'), borderWidth: 2, borderColor: '#fff' }]
-    },
-    options: { responsive: true, plugins: { legend: { position:'bottom', labels:{ font:{size:12}, padding:12 } } } }
-  });
+  // ── Pie chart (donut + legend style) ──
+  if (pieChart) { pieChart.destroy(); pieChart = null; }
+  const pieWrap = document.getElementById('pie-wrap');
+  if (!catList.length) {
+    pieWrap.innerHTML = '<div class="h-no-data">ไม่มีข้อมูล</div>';
+  } else {
+    const pieColors = catList.map(([k]) => CATS[k]?.color || '#ccc');
+    const pieVals   = catList.map(([,v]) => v);
+    const pieLabels = catList.map(([k]) => CATS[k]?.name || k);
+    pieWrap.innerHTML = `<div class="h-donut-wrap">
+      <canvas id="pie-canvas" class="h-donut-canvas" width="150" height="150"></canvas>
+      <div class="h-legend" id="pie-legend"></div>
+    </div>`;
+    document.getElementById('pie-legend').innerHTML = catList.map(([k,v],i) => `
+      <div class="h-legend-item">
+        <div class="h-legend-dot" style="background:${pieColors[i]}"></div>
+        <div class="h-legend-name">${pieLabels[i]}</div>
+        <div class="h-legend-amt">${fmt(v)}</div>
+        <div class="h-legend-pct">${total ? Math.round(v/total*100) : 0}%</div>
+      </div>`).join('');
+    setTimeout(() => {
+      const canvas = document.getElementById('pie-canvas');
+      if (!canvas) return;
+      pieChart = new Chart(canvas, {
+        type: 'doughnut',
+        data: { datasets: [{ data: pieVals, backgroundColor: pieColors, borderWidth: 2, borderColor: '#fff', hoverOffset: 4 }] },
+        options: { responsive: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { duration: 400 } }
+      });
+    }, 80);
+  }
 
   if (barChart) barChart.destroy();
   barChart = new Chart(document.getElementById('bar-chart').getContext('2d'), {
