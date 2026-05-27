@@ -548,14 +548,16 @@ html, body {
         <div class="card-title">สัดส่วนตามหมวดหมู่</div>
         <div id="pie-wrap"><div class="h-no-data">ไม่มีข้อมูล</div></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="card" style="margin:0">
-          <div class="card-title" style="font-size:13px">รายจ่ายแยกตามคน</div>
-          <div style="position:relative;height:160px"><canvas id="bar-chart"></canvas></div>
-        </div>
-        <div class="card" style="margin:0">
-          <div class="card-title" style="font-size:13px">ส่วนตัว vs ครอบครัว</div>
-          <div style="position:relative;height:160px"><canvas id="type-chart"></canvas></div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div class="card-title" style="font-size:13px;margin-bottom:8px">รายจ่ายแยกตามคน</div>
+            <div style="position:relative;height:160px"><canvas id="bar-chart"></canvas></div>
+          </div>
+          <div>
+            <div class="card-title" style="font-size:13px;margin-bottom:8px">ส่วนตัว vs ครอบครัว</div>
+            <div style="position:relative;height:160px"><canvas id="type-chart"></canvas></div>
+          </div>
         </div>
       </div>
       <div class="card">
