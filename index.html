@@ -1952,7 +1952,7 @@ function renderSummary() {
     type: 'bar',
     data: {
       labels: ['พ่อ','แม่','ลูก'],
-      datasets: [{ data:[byDad,byMom,byChild], backgroundColor:['#4361ee','#e040fb','#00b894'], borderRadius:8, barPercentage:0.6, categoryPercentage:0.8 }]
+      datasets: [{ data:[byDad,byMom,byChild], backgroundColor:['#4361ee','#e040fb','#00b894'], borderRadius:8, barThickness:36 }]
     },
     options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, layout:{padding:{left:4,right:4}}, scales:{ x:xOpts, y:yOpts } }
   });
@@ -1962,7 +1962,7 @@ function renderSummary() {
     type: 'bar',
     data: {
       labels: ['ส่วนตัว','ครอบครัว'],
-      datasets: [{ data:[byPersonal,byFamily], backgroundColor:['#4361ee','#f4a261'], borderRadius:8, barPercentage:0.6, categoryPercentage:0.8 }]
+      datasets: [{ data:[byPersonal,byFamily], backgroundColor:['#4361ee','#f4a261'], borderRadius:8, barThickness:36 }]
     },
     options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, layout:{padding:{left:4,right:4}}, scales:{ x:xOpts, y:yOpts } }
   });
