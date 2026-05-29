@@ -1,8 +1,14 @@
-const CACHE = 'family-expense-v3';
-const ASSETS = ['./manifest.json'];
+const CACHE = 'family-expense-v4';
+const ASSETS = [
+  './manifest.json',
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
+  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(ASSETS))
+  );
   self.skipWaiting();
 });
 
@@ -16,13 +22,24 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // HTML always from network (never cache) so updates are instant
-  if (e.request.destination === 'document' || e.request.url.endsWith('index.html')) {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  const url = e.request.url;
+
+  // HTML — network first, fallback to cache (ได้ version ล่าสุดเสมอ)
+  if (e.request.destination === 'document' || url.endsWith('index.html')) {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => { const c = res.clone(); caches.open(CACHE).then(cache => cache.put(e.request, c)); return res; })
+        .catch(() => caches.match(e.request))
+    );
     return;
   }
-  // Other assets: cache first
+
+  // CDN scripts & assets — cache first (เร็ว + ใช้ออฟไลน์ได้)
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+      const c = res.clone();
+      caches.open(CACHE).then(cache => cache.put(e.request, c));
+      return res;
+    }))
   );
 });

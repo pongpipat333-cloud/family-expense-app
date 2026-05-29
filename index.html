@@ -147,6 +147,7 @@ html, body {
 .stat-value.green { color: var(--green); }
 .stat-value.red { color: var(--red); }
 .stat-value.orange { color: var(--orange); }
+.stat-sub { font-size: 10px; color: var(--text-3); margin-top: 2px; }
 
 .form-group { margin-bottom: 14px; }
 .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
@@ -539,9 +540,9 @@ html, body {
         <div class="stat-card"><div class="stat-label">ครอบครัว</div><div class="stat-value" id="s-family">฿0</div></div>
       </div>
       <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-        <div class="stat-card"><div class="stat-label">พ่อ จ่าย</div><div class="stat-value" id="s-dad">฿0</div></div>
-        <div class="stat-card"><div class="stat-label">แม่ จ่าย</div><div class="stat-value" id="s-mom">฿0</div></div>
-        <div class="stat-card"><div class="stat-label">ลูก จ่าย</div><div class="stat-value" id="s-child">฿0</div></div>
+        <div class="stat-card"><div class="stat-label">พ่อ จ่าย</div><div class="stat-value" id="s-dad">฿0</div><div class="stat-sub" id="s-dad-pct">0%</div></div>
+        <div class="stat-card"><div class="stat-label">แม่ จ่าย</div><div class="stat-value" id="s-mom">฿0</div><div class="stat-sub" id="s-mom-pct">0%</div></div>
+        <div class="stat-card"><div class="stat-label">ลูก จ่าย</div><div class="stat-value" id="s-child">฿0</div><div class="stat-sub" id="s-child-pct">0%</div></div>
       </div>
 
       <div class="card">
@@ -1183,6 +1184,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
+
 
 // ===== State =====
 let uid = null;
@@ -1901,6 +1903,9 @@ function renderSummary() {
   document.getElementById('s-dad').textContent      = fmt(byDad);
   document.getElementById('s-mom').textContent      = fmt(byMom);
   document.getElementById('s-child').textContent    = fmt(byChild);
+  document.getElementById('s-dad-pct').textContent   = total > 0 ? Math.round(byDad/total*100)+'%' : '0%';
+  document.getElementById('s-mom-pct').textContent   = total > 0 ? Math.round(byMom/total*100)+'%' : '0%';
+  document.getElementById('s-child-pct').textContent = total > 0 ? Math.round(byChild/total*100)+'%' : '0%';
 
   const byCat = {};
   me.forEach(e => { byCat[e.category] = (byCat[e.category]||0)+Number(e.amount); });
@@ -2699,14 +2704,19 @@ document.getElementById('dep-confirm').addEventListener('click', async () => {
 document.querySelectorAll('.modal-overlay').forEach(o =>
   o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
 
-// ===== Service Worker — unregister old caches then re-register =====
+// ===== Service Worker =====
 if ('serviceWorker' in navigator) {
-  // 1) Unregister ALL old service workers so cached index.html is gone
   navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(r => r.unregister());
+    // unregister SW เก่าที่ไม่ใช่ sw.js (version เก่า)
+    const keeps = regs.filter(r =>
+      r.active?.scriptURL?.endsWith('sw.js') ||
+      r.installing?.scriptURL?.endsWith('sw.js') ||
+      r.waiting?.scriptURL?.endsWith('sw.js')
+    );
+    regs.filter(r => !keeps.includes(r)).forEach(r => r.unregister());
   });
-  // 2) Clear all caches
-  caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  // register SW ใหม่
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
 </script>
